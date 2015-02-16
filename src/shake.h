@@ -26,7 +26,7 @@ typedef struct listElement
 } listElement;
 
 extern listElement *listHead;
-extern int numOfDevices;
+extern unsigned int numOfDevices;
 
 /* Helper functions */
 int nameFilter(const struct dirent *entry);
@@ -38,7 +38,8 @@ listElement *listElementGet(listElement *head, unsigned int id);
 /* libShake functions */
 int shakeInit();
 void shakeQuit();
-int shakeListDevices();
+void shakeListDevices();
+int shakeNumOfDevices();
 shakeDev *shakeOpen(unsigned int id);
 void shakeClose(shakeDev *dev);
 int shakeQuery(shakeDev *dev);

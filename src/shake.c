@@ -12,7 +12,7 @@
 #include "shake.h"
 
 listElement *listHead;
-int numOfDevices;
+unsigned int numOfDevices;
 
 /* Helper functions */
 
@@ -149,7 +149,7 @@ void shakeQuit()
 	}
 }
 
-int shakeListDevices()
+void shakeListDevices()
 {
 	listElement *curElem;
 	int i;
@@ -158,6 +158,11 @@ int shakeListDevices()
 	{
 		printf("%d) %s\n", i, curElem->dev->node);
 	}
+}
+
+int shakeNumOfDevices()
+{
+	return numOfDevices;
 }
 
 int shakeProbe(shakeDev *dev)

@@ -8,7 +8,7 @@ int main()
 	shakeInit();
 	shakeListDevices();
 
-	if (numOfDevices > 0)
+	if (shakeNumOfDevices() > 0)
 	{
 		device = shakeOpen(0);
 
