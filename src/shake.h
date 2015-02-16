@@ -17,6 +17,8 @@ typedef struct shakeDev
 	char *node;
 	struct ff_effect effect;
 	struct input_event play;
+	unsigned long features[4];
+	int n_effects; /* Number of effects the device can play at the same time */
 } shakeDev;
 
 typedef struct listElement
@@ -43,7 +45,7 @@ int shakeNumOfDevices();
 shakeDev *shakeOpen(unsigned int id);
 void shakeClose(shakeDev *dev);
 int shakeQuery(shakeDev *dev);
-void shakeSetEffect(shakeDev *deve, int effect, int duration);
+int shakeSetEffect(shakeDev *dev, int effect, int duration);
 void shakeUploadEffect(shakeDev *dev);
 void shakePlay(shakeDev *dev);
 

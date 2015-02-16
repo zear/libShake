@@ -12,9 +12,11 @@ int main()
 	{
 		device = shakeOpen(0);
 
-		shakeSetEffect(device, FF_PERIODIC, 2000);
-		shakeUploadEffect(device);
-		shakePlay(device);
+		if (!shakeSetEffect(device, FF_PERIODIC, 2000))
+		{
+			shakeUploadEffect(device);
+			shakePlay(device);
+		}
 
 		sleep(2);
 		shakeClose(device);

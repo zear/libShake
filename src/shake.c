@@ -200,30 +200,27 @@ shakeDev *shakeOpen(unsigned int id)
 
 int shakeQuery(shakeDev *dev)
 {
-	unsigned long features[4];
-	int n_effects; /* Number of effects the device can play at the same time */
-
 	if(!dev)
 		return -1;
 
-	if (ioctl(dev->fd, EVIOCGBIT(EV_FF, sizeof(features)), features) == -1)
+	if (ioctl(dev->fd, EVIOCGBIT(EV_FF, sizeof(dev->features)), dev->features) == -1)
 	{
 /*		perror("Ioctl query");*/
 		return -1;
 	}
 
 /*	printf("Effect id:\tEffect name:\n");*/
-/*	if (test_bit(FF_CONSTANT, features)) printf("#%d\t\tConstant\n", FF_CONSTANT);*/
-/*	if (test_bit(FF_PERIODIC, features)) printf("#%d\t\tPeriodic\n", FF_PERIODIC);*/
-/*	if (test_bit(FF_SPRING, features))   printf("#%d\t\tSpring\n", FF_SPRING);*/
-/*	if (test_bit(FF_FRICTION, features)) printf("#%d\t\tFriction\n", FF_FRICTION);*/
-/*	if (test_bit(FF_RUMBLE, features))   printf("#%d\t\tRumble\n", FF_RUMBLE);*/
+/*	if (test_bit(FF_CONSTANT, dev->features)) printf("#%d\t\tConstant\n", FF_CONSTANT);*/
+/*	if (test_bit(FF_PERIODIC, dev->features)) printf("#%d\t\tPeriodic\n", FF_PERIODIC);*/
+/*	if (test_bit(FF_SPRING, dev->features))   printf("#%d\t\tSpring\n", FF_SPRING);*/
+/*	if (test_bit(FF_FRICTION, dev->features)) printf("#%d\t\tFriction\n", FF_FRICTION);*/
+/*	if (test_bit(FF_RUMBLE, dev->features))   printf("#%d\t\tRumble\n", FF_RUMBLE);*/
 /*	printf("-end-\n");*/
 
-	if (!features[0] && !features[1] && !features[2] && !features[3])
+	if (!dev->features[0] && !dev->features[1] && !dev->features[2] && !dev->features[3])
 		return 1;
 
-	if (ioctl(dev->fd, EVIOCGEFFECTS, &n_effects) == -1)
+	if (ioctl(dev->fd, EVIOCGEFFECTS, &dev->n_effects) == -1)
 	{
 /*		perror("Ioctl query");*/
 		return -1;
@@ -232,18 +229,21 @@ int shakeQuery(shakeDev *dev)
 	return 0;
 }
 
-void shakeSetEffect(shakeDev *dev, int effect, int duration)
+int shakeSetEffect(shakeDev *dev, int effect, int duration)
 {
 	if(!dev)
-		return;
+		return -1;
 
-	if(effect != FF_RUMBLE && effect != FF_PERIODIC)
+	if (!test_bit(effect, dev->features))
 	{
 		perror("Unsupported effect\n");
-		return;
+		return -2;
 	}
+
 	dev->effect.type = effect;
 	dev->effect.replay.length = duration; // in ms
+
+	return 0;
 }
 
 void shakeUploadEffect(shakeDev *dev)
