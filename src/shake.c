@@ -145,6 +145,19 @@ void shakeQuit()
 {
 	if (listHead != NULL)
 	{
+		listElement *toDelElem;
+		listElement *curElem = listHead;
+
+		while(curElem)
+		{
+			toDelElem = curElem;
+			curElem = curElem->next;
+
+			shakeClose(toDelElem->dev);
+			if (toDelElem->dev->node != NULL)
+				free(toDelElem->dev->node);
+		}
+
 		listElementDeleteAll(listHead);
 	}
 }
