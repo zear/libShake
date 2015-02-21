@@ -300,7 +300,7 @@ void shakeUploadEffect(shakeDev *dev)
 	if (ioctl(dev->fd, EVIOCSFF, &dev->effect) == -1)
 	{
 		perror("upload effect\n");
-		exit(1);
+		return;
 	}
 }
 
@@ -317,7 +317,7 @@ void shakePlay(shakeDev *dev)
 	if (write(dev->fd, (const void*) &dev->play, sizeof(dev->play)) == -1)
 	{
 		perror("sending event");
-		exit(1);
+		return;
 	}
 }
 
