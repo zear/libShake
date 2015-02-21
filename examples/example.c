@@ -4,6 +4,8 @@
 int main()
 {
 	shakeDev *device;
+	shakeEffect effect;
+
 
 	shakeInit();
 	shakeListDevices();
@@ -12,7 +14,11 @@ int main()
 	{
 		device = shakeOpen(0);
 
-		if (!shakeSetEffect(device, FF_PERIODIC, 2000))
+		shakeInitEffect(&effect, SHAKE_EFFECT_PERIODIC);
+		effect.periodic.period = 0.1*0x100;
+		effect.periodic.magnitude = 0x6000;
+
+		if (!shakeSetEffect(device, effect, 2000))
 		{
 			shakeUploadEffect(device);
 			shakePlay(device);

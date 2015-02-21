@@ -243,19 +243,62 @@ int shakeQuery(shakeDev *dev)
 	return 0;
 }
 
-int shakeSetEffect(shakeDev *dev, int effect, int duration)
+void shakeInitEffect(shakeEffect *effect, shakeEffectType type)
+{
+	if (!effect)
+		return;
+
+	switch (type)
+	{
+		case SHAKE_EFFECT_RUMBLE:
+			memset(&effect->rumble, 0, sizeof(ShakeEffectRumble));
+		break;
+		case SHAKE_EFFECT_PERIODIC:
+			memset(&effect->periodic, 0, sizeof(ShakeEffectPeriodic));
+			effect->periodic.waveform = FF_SINE; // temp
+		break;
+		case SHAKE_EFFECT_CONSTANT:
+			memset(&effect->constant, 0, sizeof(ShakeEffectConstant));
+		break;
+		case SHAKE_EFFECT_SPRING:
+			memset(&effect->spring, 0, sizeof(ShakeEffectSpring));
+		break;
+		case SHAKE_EFFECT_FRICTION:
+			memset(&effect->friction, 0, sizeof(ShakeEffectFriction));
+		break;
+		case SHAKE_EFFECT_DAMPER:
+			memset(&effect->damper, 0, sizeof(ShakeEffectDamper));
+		break;
+		case SHAKE_EFFECT_INERTIA:
+			memset(&effect->inertia, 0, sizeof(ShakeEffectInertia));
+		break;
+		case SHAKE_EFFECT_RAMP:
+			memset(&effect->ramp, 0, sizeof(ShakeEffectRamp));
+		break;
+
+		default:
+			perror("Unsupported effect\n");
+		break;
+	}
+
+	effect->common.type = type;
+	effect->common.id = -1;
+}
+
+int shakeSetEffect(shakeDev *dev, shakeEffect effect, int duration)
 {
 	if(!dev)
 		return -1;
 
-	if (!test_bit(effect, dev->features))
-	{
-		perror("Unsupported effect\n");
-		return -2;
-	}
+// TODO:
+/*	if (!test_bit(effect, dev->features))*/
+/*	{*/
+/*		perror("Unsupported effect\n");*/
+/*		return -2;*/
+/*	}*/
 
-	dev->effect.type = effect;
-	dev->effect.replay.length = duration; // in ms
+	dev->effect = effect;
+	dev->effect.common.length = duration; // in ms
 
 	return 0;
 }
@@ -265,31 +308,33 @@ void shakeUploadEffect(shakeDev *dev)
 	if(!dev)
 		return;
 
-	if(dev->effect.type == FF_RUMBLE)
+	struct ff_effect effect;
+
+	if(dev->effect.common.type == SHAKE_EFFECT_RUMBLE)
 	{
-		dev->effect.type = FF_RUMBLE;
-		dev->effect.id = -1;
-		dev->effect.u.rumble.strong_magnitude = 0;
-		dev->effect.u.rumble.weak_magnitude   = 0xc000;
-		dev->effect.replay.delay  = 0;
+		effect.type = FF_RUMBLE;
+		effect.id = -1;
+		effect.u.rumble.strong_magnitude = dev->effect.rumble.strongMagnitude;
+		effect.u.rumble.weak_magnitude   = dev->effect.rumble.weakMagnitude;
+		effect.replay.delay  = dev->effect.common.delay;
 	}
-	else if(dev->effect.type == FF_PERIODIC)
+	else if(dev->effect.common.type == SHAKE_EFFECT_PERIODIC)
 	{
-		dev->effect.type = FF_PERIODIC;
-		dev->effect.id = -1;
-		dev->effect.u.periodic.waveform = FF_SINE;
-		dev->effect.u.periodic.period = 0.1*0x100;     /* 0.1 second */
-		dev->effect.u.periodic.magnitude = 0x6000;     /* 0.5 * Maximum magnitude */
-		dev->effect.u.periodic.offset = 0;
-		dev->effect.u.periodic.phase = 0;
-		dev->effect.direction = 0x4000;        /* Along X axis */
-		dev->effect.u.periodic.envelope.attack_length = 0x100;
-		dev->effect.u.periodic.envelope.attack_level  = 0;
-		dev->effect.u.periodic.envelope.fade_length = 0x100;
-		dev->effect.u.periodic.envelope.fade_level  = 0;
-		dev->effect.trigger.button = 0;
-		dev->effect.trigger.interval = 0;
-		dev->effect.replay.delay = 0;
+		effect.type = FF_PERIODIC;
+		effect.id = -1;
+		effect.u.periodic.waveform = dev->effect.periodic.waveform;
+		effect.u.periodic.period = dev->effect.periodic.period;
+		effect.u.periodic.magnitude = dev->effect.periodic.magnitude;
+		effect.u.periodic.offset = dev->effect.periodic.offset;
+		effect.u.periodic.phase = dev->effect.periodic.phase;
+		effect.direction = 0x4000;
+		effect.u.periodic.envelope.attack_length = 0x100;
+		effect.u.periodic.envelope.attack_level  = 0;
+		effect.u.periodic.envelope.fade_length = 0x100;
+		effect.u.periodic.envelope.fade_level  = 0;
+		effect.trigger.button = 0;
+		effect.trigger.interval = 0;
+		effect.replay.delay = dev->effect.common.delay;
 	}
 	else
 	{
@@ -297,11 +342,13 @@ void shakeUploadEffect(shakeDev *dev)
 		return;
 	}
 
-	if (ioctl(dev->fd, EVIOCSFF, &dev->effect) == -1)
+	if (ioctl(dev->fd, EVIOCSFF, &effect) == -1)
 	{
 		perror("upload effect\n");
 		return;
 	}
+
+	dev->effect.common.id = effect.id;
 }
 
 void shakePlay(shakeDev *dev)
@@ -311,7 +358,7 @@ void shakePlay(shakeDev *dev)
 
 /*	printf("Playing effect #%d for a duration of %d ms\n", dev->effect.type, dev->effect.replay.length);*/
 	dev->play.type = EV_FF;
-	dev->play.code = dev->effect.id; /* the id we got when uploading the effect */
+	dev->play.code = dev->effect.common.id; /* the id we got when uploading the effect */
 	dev->play.value = FF_STATUS_PLAYING; /* play: FF_STATUS_PLAYING, stop: FF_STATUS_STOPPED */
 
 	if (write(dev->fd, (const void*) &dev->play, sizeof(dev->play)) == -1)
