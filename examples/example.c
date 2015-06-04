@@ -1,4 +1,3 @@
-#include <linux/input.h>
 #include "shake.h"
 
 int main()

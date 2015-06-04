@@ -1,6 +1,8 @@
 #ifndef _SHAKE_H_
 #define _SHAKE_H_
 
+#include <linux/input.h>
+
 typedef enum shakeEffectType
 {
 	/* Force feedback effects */
