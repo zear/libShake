@@ -4,7 +4,7 @@ int main()
 {
 	shakeDev *device;
 	shakeEffect effect;
-
+	int id;
 
 	shakeInit();
 	shakeListDevices();
@@ -16,14 +16,13 @@ int main()
 		shakeInitEffect(&effect, SHAKE_EFFECT_PERIODIC);
 		effect.periodic.period = 0.1*0x100;
 		effect.periodic.magnitude = 0x6000;
+		effect.common.length = 2000;
 
-		if (!shakeSetEffect(device, effect, 2000))
-		{
-			shakeUploadEffect(device);
-			shakePlay(device);
-		}
+		id = shakeUploadEffect(device, effect);
+		shakePlay(device, id);
 
 		sleep(2);
+		shakeEraseEffect(device, id);
 		shakeClose(device);
 	}
 

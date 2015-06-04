@@ -277,7 +277,7 @@ void shakeInitEffect(shakeEffect *effect, shakeEffectType type)
 		break;
 
 		default:
-			perror("Unsupported effect\n");
+			perror("Unsupported effect");
 		break;
 	}
 
@@ -285,83 +285,104 @@ void shakeInitEffect(shakeEffect *effect, shakeEffectType type)
 	effect->common.id = -1;
 }
 
-int shakeSetEffect(shakeDev *dev, shakeEffect effect, int duration)
+int shakeUploadEffect(shakeDev *dev, shakeEffect effect)
 {
-	if(!dev)
+	struct ff_effect e;
+
+	if (!dev)
 		return -1;
 
-// TODO:
-/*	if (!test_bit(effect, dev->features))*/
-/*	{*/
-/*		perror("Unsupported effect\n");*/
-/*		return -2;*/
-/*	}*/
-
-	dev->effect = effect;
-	dev->effect.common.length = duration; // in ms
-
-	return 0;
-}
-
-void shakeUploadEffect(shakeDev *dev)
-{
-	if(!dev)
-		return;
-
-	struct ff_effect effect;
-
-	if(dev->effect.common.type == SHAKE_EFFECT_RUMBLE)
+	if(effect.common.type == SHAKE_EFFECT_RUMBLE)
 	{
-		effect.type = FF_RUMBLE;
-		effect.id = -1;
-		effect.u.rumble.strong_magnitude = dev->effect.rumble.strongMagnitude;
-		effect.u.rumble.weak_magnitude   = dev->effect.rumble.weakMagnitude;
-		effect.replay.delay  = dev->effect.common.delay;
+		e.type = FF_RUMBLE;
+		e.id = -1;
+		e.u.rumble.strong_magnitude = effect.rumble.strongMagnitude;
+		e.u.rumble.weak_magnitude   = effect.rumble.weakMagnitude;
+		e.replay.delay  = effect.common.delay;
+		e.replay.length = effect.common.length;
 	}
-	else if(dev->effect.common.type == SHAKE_EFFECT_PERIODIC)
+	else if(effect.common.type == SHAKE_EFFECT_PERIODIC)
 	{
-		effect.type = FF_PERIODIC;
-		effect.id = -1;
-		effect.u.periodic.waveform = dev->effect.periodic.waveform;
-		effect.u.periodic.period = dev->effect.periodic.period;
-		effect.u.periodic.magnitude = dev->effect.periodic.magnitude;
-		effect.u.periodic.offset = dev->effect.periodic.offset;
-		effect.u.periodic.phase = dev->effect.periodic.phase;
-		effect.direction = 0x4000;
-		effect.u.periodic.envelope.attack_length = 0x100;
-		effect.u.periodic.envelope.attack_level  = 0;
-		effect.u.periodic.envelope.fade_length = 0x100;
-		effect.u.periodic.envelope.fade_level  = 0;
-		effect.trigger.button = 0;
-		effect.trigger.interval = 0;
-		effect.replay.delay = dev->effect.common.delay;
+		e.type = FF_PERIODIC;
+		e.id = -1;
+		e.u.periodic.waveform = effect.periodic.waveform;
+		e.u.periodic.period = effect.periodic.period;
+		e.u.periodic.magnitude = effect.periodic.magnitude;
+		e.u.periodic.offset = effect.periodic.offset;
+		e.u.periodic.phase = effect.periodic.phase;
+		e.direction = 0x4000;
+		e.u.periodic.envelope.attack_length = 0x100;
+		e.u.periodic.envelope.attack_level  = 0;
+		e.u.periodic.envelope.fade_length = 0x100;
+		e.u.periodic.envelope.fade_level  = 0;
+		e.trigger.button = 0;
+		e.trigger.interval = 0;
+		e.replay.delay = effect.common.delay;
+		e.replay.length = effect.common.length;
 	}
 	else
 	{
-		perror("Unsupported effect\n");
-		return;
+		perror("Unsupported effect");
+		return -2;
 	}
 
-	if (ioctl(dev->fd, EVIOCSFF, &effect) == -1)
+	if (ioctl(dev->fd, EVIOCSFF, &e) == -1)
 	{
-		perror("upload effect\n");
-		return;
+		perror("upload effect");
+		return -3;
 	}
 
-	dev->effect.common.id = effect.id;
+	return e.id;
 }
 
-void shakePlay(shakeDev *dev)
+void shakeEraseEffect(shakeDev *dev, int id)
+{
+	if (!dev)
+		return;
+
+	if (id < 0)
+		return;
+
+	if (ioctl(dev->fd, EVIOCRMFF, id) == -1)
+	{
+		perror("erase effect");
+		return;
+	}
+}
+
+void shakePlay(shakeDev *dev, int id)
 {
 	if(!dev)
+		return;
+
+	if(id < 0)
 		return;
 
 /*	printf("Playing effect #%d for a duration of %d ms\n", dev->effect.type, dev->effect.replay.length);*/
 	dev->play.type = EV_FF;
-	dev->play.code = dev->effect.common.id; /* the id we got when uploading the effect */
+	dev->play.code = id; /* the id we got when uploading the effect */
 	dev->play.value = FF_STATUS_PLAYING; /* play: FF_STATUS_PLAYING, stop: FF_STATUS_STOPPED */
 
 	if (write(dev->fd, (const void*) &dev->play, sizeof(dev->play)) == -1)
+	{
+		perror("sending event");
+		return;
+	}
+}
+
+void shakeStop(shakeDev *dev, int id)
+{
+	if(!dev)
+		return;
+
+	if(id < 0)
+		return;
+
+	dev->stop.type = EV_FF;
+	dev->stop.code = id; /* the id we got when uploading the effect */
+	dev->stop.value = FF_STATUS_STOPPED;
+
+	if (write(dev->fd, (const void*) &dev->stop, sizeof(dev->stop)) == -1)
 	{
 		perror("sending event");
 		return;
