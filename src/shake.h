@@ -13,6 +13,7 @@ int shakeNumOfDevices();
 shakeDev *shakeOpen(unsigned int id);
 void shakeClose(shakeDev *dev);
 int shakeQuery(shakeDev *dev);
+void shakeSetGain(shakeDev *dev, int gain);
 void shakeInitEffect(shakeEffect *effect, shakeEffectType type);
 int shakeUploadEffect(shakeDev *dev, shakeEffect effect);
 void shakeEraseEffect(shakeDev *dev, int id);

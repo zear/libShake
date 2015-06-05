@@ -243,6 +243,25 @@ int shakeQuery(shakeDev *dev)
 	return 0;
 }
 
+void shakeSetGain(shakeDev *dev, int gain)
+{
+	struct input_event ie;
+
+	if (gain < 0)
+		gain = 0;
+	if (gain > 100)
+		gain = 100;
+
+	ie.type = EV_FF;
+	ie.code = FF_GAIN;
+	ie.value = 0xFFFFUL * gain / 100;
+
+	if (write(dev->fd, &ie, sizeof(ie)) == -1)
+	{
+		perror("set gain");
+	}
+}
+
 void shakeInitEffect(shakeEffect *effect, shakeEffectType type)
 {
 	if (!effect)
