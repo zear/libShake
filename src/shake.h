@@ -1,6 +1,10 @@
 #ifndef _SHAKE_H_
 #define _SHAKE_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "shake_private.h"
 
 struct shakeDev;
@@ -19,5 +23,9 @@ int shakeUploadEffect(shakeDev *dev, shakeEffect effect);
 void shakeEraseEffect(shakeDev *dev, int id);
 void shakePlay(shakeDev *dev, int id);
 void shakeStop(shakeDev *dev, int id);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _SHAKE_H_ */
