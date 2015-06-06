@@ -6,6 +6,7 @@ endif
 CC           ?= gcc
 STRIP        ?= strip
 TARGET       ?= libshake.so
+SYSROOT      := $(shell $(CC) --print-sysroot)
 CFLAGS       := -fPIC
 SRCDIR       := src
 OBJDIR       := obj
@@ -37,4 +38,5 @@ $(OBJDIR):
 clean:
 	rm -Rf $(TARGET) $(OBJDIR)
 
-
+install:
+	cp src/*.h $(SYSROOT)/usr/include/
