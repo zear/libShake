@@ -5,10 +5,10 @@
 extern "C" {
 #endif
 
-struct shakeDev;
-typedef struct shakeDev shakeDev;
+struct Shake_Device;
+typedef struct Shake_Device Shake_Device;
 
-typedef enum shakePeriodicWaveform
+typedef enum Shake_PeriodicWaveform
 {
 	SHAKE_PERIODIC_SQUARE = 0,
 	SHAKE_PERIODIC_TRIANGLE,
@@ -17,9 +17,9 @@ typedef enum shakePeriodicWaveform
 	SHAKE_PERIODIC_SAW_DOWN,
 	SHAKE_PERIODIC_CUSTOM,
 	SHAKE_PERIODIC_COUNT
-} ShakePeriodicWaveform;
+} Shake_PeriodicWaveform;
 
-typedef enum shakeEffectType
+typedef enum Shake_EffectType
 {
 	/* Force feedback effects */
 	SHAKE_EFFECT_RUMBLE = 0,
@@ -31,62 +31,62 @@ typedef enum shakeEffectType
 	SHAKE_EFFECT_INERTIA,
 	SHAKE_EFFECT_RAMP,
 	SHAKE_EFFECT_COUNT
-} shakeEffectType;
+} Shake_EffectType;
 
-typedef struct ShakeEnvelope
+typedef struct Shake_Envelope
 {
 	int attackLength;
 	int attackLevel;
 	int fadeLength;
 	int fadeLevel;
-} ShakeEnvelope;
+} Shake_Envelope;
 
-typedef struct ShakeEffectRumble
+typedef struct Shake_EffectRumble
 {
 	int strongMagnitude;
 	int weakMagnitude;
-} ShakeEffectRumble;
+} Shake_EffectRumble;
 
-typedef struct ShakeEffectPeriodic
+typedef struct Shake_EffectPeriodic
 {
-	ShakePeriodicWaveform waveform;
+	Shake_PeriodicWaveform waveform;
 	int period;
 	int magnitude;
 	int offset;
 	int phase;
-	ShakeEnvelope envelope;
+	Shake_Envelope envelope;
 
 	int customLen;
 	// custom data
-} ShakeEffectPeriodic;
+} Shake_EffectPeriodic;
 
-typedef struct ShakeEffect
+typedef struct Shake_Effect
 {
-	shakeEffectType type;
+	Shake_EffectType type;
 	int id;
 	int direction;
 	int length;
 	int delay;
 	union {
-		ShakeEffectRumble rumble;
-		ShakeEffectPeriodic periodic;
+		Shake_EffectRumble rumble;
+		Shake_EffectPeriodic periodic;
 	};
-} shakeEffect;
+} Shake_Effect;
 
 /* libShake functions */
-int shakeInit();
-void shakeQuit();
-void shakeListDevices();
-int shakeNumOfDevices();
-shakeDev *shakeOpen(unsigned int id);
-void shakeClose(shakeDev *dev);
-int shakeQuery(shakeDev *dev);
-void shakeSetGain(shakeDev *dev, int gain);
-void shakeInitEffect(shakeEffect *effect, shakeEffectType type);
-int shakeUploadEffect(shakeDev *dev, shakeEffect effect);
-void shakeEraseEffect(shakeDev *dev, int id);
-void shakePlay(shakeDev *dev, int id);
-void shakeStop(shakeDev *dev, int id);
+int Shake_Init();
+void Shake_Quit();
+void Shake_ListDevices();
+int Shake_NumOfDevices();
+Shake_Device *Shake_Open(unsigned int id);
+void Shake_Close(Shake_Device *dev);
+int Shake_Query(Shake_Device *dev);
+void Shake_SetGain(Shake_Device *dev, int gain);
+void Shake_InitEffect(Shake_Effect *effect, Shake_EffectType type);
+int Shake_UploadEffect(Shake_Device *dev, Shake_Effect effect);
+void Shake_EraseEffect(Shake_Device *dev, int id);
+void Shake_Play(Shake_Device *dev, int id);
+void Shake_Stop(Shake_Device *dev, int id);
 
 #ifdef __cplusplus
 }

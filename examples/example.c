@@ -2,18 +2,18 @@
 
 int main()
 {
-	shakeDev *device;
-	shakeEffect effect;
+	Shake_Device *device;
+	Shake_Effect effect;
 	int id;
 
-	shakeInit();
-	shakeListDevices();
+	Shake_Init();
+	Shake_ListDevices();
 
-	if (shakeNumOfDevices() > 0)
+	if (Shake_NumOfDevices() > 0)
 	{
-		device = shakeOpen(0);
+		device = Shake_Open(0);
 
-		shakeInitEffect(&effect, SHAKE_EFFECT_PERIODIC);
+		Shake_InitEffect(&effect, SHAKE_EFFECT_PERIODIC);
 		effect.periodic.waveform		= SHAKE_PERIODIC_SINE;
 		effect.periodic.period			= 0.1*0x100;
 		effect.periodic.magnitude		= 0x6000;
@@ -25,15 +25,15 @@ int main()
 		effect.length				= 2000;
 		effect.delay				= 0;
 
-		id = shakeUploadEffect(device, effect);
-		shakePlay(device, id);
+		id = Shake_UploadEffect(device, effect);
+		Shake_Play(device, id);
 
 		sleep(2);
-		shakeEraseEffect(device, id);
-		shakeClose(device);
+		Shake_EraseEffect(device, id);
+		Shake_Close(device);
 	}
 
-	shakeQuit();
+	Shake_Quit();
 
 	return 0;
 }

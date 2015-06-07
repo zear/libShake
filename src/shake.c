@@ -18,7 +18,7 @@ unsigned int numOfDevices;
 
 /* Prototypes */
 
-int shakeProbe(shakeDev *dev);
+int Shake_Probe(Shake_Device *dev);
 
 /* Helper functions */
 
@@ -103,7 +103,7 @@ listElement *listElementGet(listElement *head, unsigned int id)
 
 /* libShake functions */
 
-int shakeInit()
+int Shake_Init()
 {
 	struct dirent **nameList;
 	int numOfEntries;
@@ -121,7 +121,7 @@ int shakeInit()
 	{
 		for (i = 0; i < numOfEntries; ++i)
 		{
-			shakeDev dev;
+			Shake_Device dev;
 
 			dev.node = malloc(strlen(SHAKE_DIR_NODES) + strlen("/") + strlen(nameList[i]->d_name) + 1);
 			if (dev.node == NULL)
@@ -131,11 +131,11 @@ int shakeInit()
 			strcat(dev.node, "/");
 			strcat(dev.node, nameList[i]->d_name);
 
-			if (shakeProbe(&dev))
+			if (Shake_Probe(&dev))
 			{
 				listHead = listElementPrepend(listHead);
-				listHead->dev = malloc(sizeof(shakeDev));
-				memcpy(listHead->dev, &dev, sizeof(shakeDev));
+				listHead->dev = malloc(sizeof(Shake_Device));
+				memcpy(listHead->dev, &dev, sizeof(Shake_Device));
 				++numOfDevices;
 			}
 			free(nameList[i]);
@@ -147,7 +147,7 @@ int shakeInit()
 	printf("Detected devices: %d\n", numOfDevices);
 }
 
-void shakeQuit()
+void Shake_Quit()
 {
 	if (listHead != NULL)
 	{
@@ -159,7 +159,7 @@ void shakeQuit()
 			toDelElem = curElem;
 			curElem = curElem->next;
 
-			shakeClose(toDelElem->dev);
+			Shake_Close(toDelElem->dev);
 			if (toDelElem->dev->node != NULL)
 				free(toDelElem->dev->node);
 		}
@@ -168,7 +168,7 @@ void shakeQuit()
 	}
 }
 
-void shakeListDevices()
+void Shake_ListDevices()
 {
 	listElement *curElem;
 	int i;
@@ -179,12 +179,12 @@ void shakeListDevices()
 	}
 }
 
-int shakeNumOfDevices()
+int Shake_NumOfDevices()
 {
 	return numOfDevices;
 }
 
-int shakeProbe(shakeDev *dev)
+int Shake_Probe(Shake_Device *dev)
 {
 	int isHaptic;
 
@@ -196,13 +196,13 @@ int shakeProbe(shakeDev *dev)
 	if (!dev->fd)
 		return -1;
 
-	isHaptic = !shakeQuery(dev);
+	isHaptic = !Shake_Query(dev);
 	dev->fd = close(dev->fd);
 	
 	return isHaptic;
 }
 
-shakeDev *shakeOpen(unsigned int id)
+Shake_Device *Shake_Open(unsigned int id)
 {
 	if (id >= numOfDevices)
 		return NULL;
@@ -217,7 +217,7 @@ shakeDev *shakeOpen(unsigned int id)
 	return element->dev->fd ? element->dev : NULL;
 }
 
-int shakeQuery(shakeDev *dev)
+int Shake_Query(Shake_Device *dev)
 {
 	if(!dev)
 		return -1;
@@ -248,7 +248,7 @@ int shakeQuery(shakeDev *dev)
 	return 0;
 }
 
-void shakeSetGain(shakeDev *dev, int gain)
+void Shake_SetGain(Shake_Device *dev, int gain)
 {
 	struct input_event ie;
 
@@ -267,7 +267,7 @@ void shakeSetGain(shakeDev *dev, int gain)
 	}
 }
 
-void shakeInitEffect(shakeEffect *effect, shakeEffectType type)
+void Shake_InitEffect(Shake_Effect *effect, Shake_EffectType type)
 {
 	if (!effect)
 		return;
@@ -278,7 +278,7 @@ void shakeInitEffect(shakeEffect *effect, shakeEffectType type)
 	effect->id = -1;
 }
 
-int shakeUploadEffect(shakeDev *dev, shakeEffect effect)
+int Shake_UploadEffect(Shake_Device *dev, Shake_Effect effect)
 {
 	struct ff_effect e;
 
@@ -328,7 +328,7 @@ int shakeUploadEffect(shakeDev *dev, shakeEffect effect)
 	return e.id;
 }
 
-void shakeEraseEffect(shakeDev *dev, int id)
+void Shake_EraseEffect(Shake_Device *dev, int id)
 {
 	if (!dev)
 		return;
@@ -343,7 +343,7 @@ void shakeEraseEffect(shakeDev *dev, int id)
 	}
 }
 
-void shakePlay(shakeDev *dev, int id)
+void Shake_Play(Shake_Device *dev, int id)
 {
 	if(!dev)
 		return;
@@ -363,7 +363,7 @@ void shakePlay(shakeDev *dev, int id)
 	}
 }
 
-void shakeStop(shakeDev *dev, int id)
+void Shake_Stop(Shake_Device *dev, int id)
 {
 	if(!dev)
 		return;
@@ -382,7 +382,7 @@ void shakeStop(shakeDev *dev, int id)
 	}
 }
 
-void shakeClose(shakeDev *dev)
+void Shake_Close(Shake_Device *dev)
 {
 	close(dev->fd);
 }
