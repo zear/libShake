@@ -271,7 +271,7 @@ void shakeInitEffect(shakeEffect *effect, shakeEffectType type)
 {
 	if (!effect)
 		return;
-	if (type < 0 || type > SHAKE_EFFECT_COUNT)
+	if (type < 0 || type >= SHAKE_EFFECT_COUNT)
 			perror("Unsupported effect");
 	effect->type = type;
 	effect->id = -1;
