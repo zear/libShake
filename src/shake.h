@@ -33,6 +33,14 @@ typedef enum shakeEffectType
 	SHAKE_EFFECT_COUNT
 } shakeEffectType;
 
+typedef struct ShakeEnvelope
+{
+	int attackLength;
+	int attackLevel;
+	int fadeLength;
+	int fadeLevel;
+} ShakeEnvelope;
+
 typedef struct ShakeEffectRumble
 {
 	int strongMagnitude;
@@ -46,8 +54,7 @@ typedef struct ShakeEffectPeriodic
 	int magnitude;
 	int offset;
 	int phase;
-
-	// envelope
+	ShakeEnvelope envelope;
 
 	int customLen;
 	// custom data
@@ -57,6 +64,7 @@ typedef struct ShakeEffect
 {
 	shakeEffectType type;
 	int id;
+	int direction;
 	int length;
 	int delay;
 	union {

@@ -289,8 +289,8 @@ int shakeUploadEffect(shakeDev *dev, shakeEffect effect)
 		e.type = FF_RUMBLE;
 		e.id = -1;
 		e.u.rumble.strong_magnitude = effect.rumble.strongMagnitude;
-		e.u.rumble.weak_magnitude   = effect.rumble.weakMagnitude;
-		e.replay.delay  = effect.delay;
+		e.u.rumble.weak_magnitude = effect.rumble.weakMagnitude;
+		e.replay.delay = effect.delay;
 		e.replay.length = effect.length;
 	}
 	else if(effect.type == SHAKE_EFFECT_PERIODIC)
@@ -302,13 +302,13 @@ int shakeUploadEffect(shakeDev *dev, shakeEffect effect)
 		e.u.periodic.magnitude = effect.periodic.magnitude;
 		e.u.periodic.offset = effect.periodic.offset;
 		e.u.periodic.phase = effect.periodic.phase;
-		e.direction = 0x4000;
-		e.u.periodic.envelope.attack_length = 0x100;
-		e.u.periodic.envelope.attack_level  = 0;
-		e.u.periodic.envelope.fade_length = 0x100;
-		e.u.periodic.envelope.fade_level  = 0;
+		e.u.periodic.envelope.attack_length = effect.periodic.envelope.attackLength;
+		e.u.periodic.envelope.attack_level = effect.periodic.envelope.attackLevel;
+		e.u.periodic.envelope.fade_length = effect.periodic.envelope.fadeLength;
+		e.u.periodic.envelope.fade_level = effect.periodic.envelope.fadeLevel;
 		e.trigger.button = 0;
 		e.trigger.interval = 0;
+		e.direction = effect.direction;
 		e.replay.delay = effect.delay;
 		e.replay.length = effect.length;
 	}
