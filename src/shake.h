@@ -41,7 +41,7 @@ typedef struct ShakeEffectRumble
 
 typedef struct ShakeEffectPeriodic
 {
-	int waveform;
+	ShakePeriodicWaveform waveform;
 	int period;
 	int magnitude;
 	int offset;
