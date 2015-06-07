@@ -10,8 +10,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "shake_private.h"
 #include "shake.h"
+#include "shake_private.h"
 
 listElement *listHead;
 unsigned int numOfDevices;

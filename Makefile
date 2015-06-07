@@ -30,7 +30,7 @@ ifdef DO_STRIP
 endif
 
 $(OBJ): $(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) -c $(CFLAGS) $< -o $@ -I include
 
 $(OBJDIR):
 	mkdir -p $@
@@ -39,4 +39,4 @@ clean:
 	rm -Rf $(TARGET) $(OBJDIR)
 
 install:
-	cp src/*.h $(SYSROOT)/usr/include/
+	cp include/*.h $(SYSROOT)/usr/include/
