@@ -248,7 +248,7 @@ int Shake_Query(Shake_Device *dev)
 	return 0;
 }
 
-void Shake_SetGain(Shake_Device *dev, int gain)
+void Shake_SetGain(const Shake_Device *dev, int gain)
 {
 	struct input_event ie;
 
@@ -278,7 +278,7 @@ void Shake_InitEffect(Shake_Effect *effect, Shake_EffectType type)
 	effect->id = -1;
 }
 
-int Shake_UploadEffect(Shake_Device *dev, Shake_Effect effect)
+int Shake_UploadEffect(const Shake_Device *dev, Shake_Effect effect)
 {
 	struct ff_effect e;
 
@@ -328,7 +328,7 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect effect)
 	return e.id;
 }
 
-void Shake_EraseEffect(Shake_Device *dev, int id)
+void Shake_EraseEffect(const Shake_Device *dev, int id)
 {
 	if (!dev)
 		return;
@@ -343,7 +343,7 @@ void Shake_EraseEffect(Shake_Device *dev, int id)
 	}
 }
 
-void Shake_Play(Shake_Device *dev, int id)
+void Shake_Play(const Shake_Device *dev, int id)
 {
 	if(!dev)
 		return;
@@ -352,18 +352,19 @@ void Shake_Play(Shake_Device *dev, int id)
 		return;
 
 /*	printf("Playing effect #%d for a duration of %d ms\n", dev->effect.type, dev->effect.replay.length);*/
-	dev->play.type = EV_FF;
-	dev->play.code = id; /* the id we got when uploading the effect */
-	dev->play.value = FF_STATUS_PLAYING; /* play: FF_STATUS_PLAYING, stop: FF_STATUS_STOPPED */
+	struct input_event play;
+	play.type = EV_FF;
+	play.code = id; /* the id we got when uploading the effect */
+	play.value = FF_STATUS_PLAYING; /* play: FF_STATUS_PLAYING, stop: FF_STATUS_STOPPED */
 
-	if (write(dev->fd, (const void*) &dev->play, sizeof(dev->play)) == -1)
+	if (write(dev->fd, (const void*) &play, sizeof(play)) == -1)
 	{
 		perror("sending event");
 		return;
 	}
 }
 
-void Shake_Stop(Shake_Device *dev, int id)
+void Shake_Stop(const Shake_Device *dev, int id)
 {
 	if(!dev)
 		return;
@@ -371,18 +372,19 @@ void Shake_Stop(Shake_Device *dev, int id)
 	if(id < 0)
 		return;
 
-	dev->stop.type = EV_FF;
-	dev->stop.code = id; /* the id we got when uploading the effect */
-	dev->stop.value = FF_STATUS_STOPPED;
+	struct input_event stop;
+	stop.type = EV_FF;
+	stop.code = id; /* the id we got when uploading the effect */
+	stop.value = FF_STATUS_STOPPED;
 
-	if (write(dev->fd, (const void*) &dev->stop, sizeof(dev->stop)) == -1)
+	if (write(dev->fd, (const void*) &stop, sizeof(stop)) == -1)
 	{
 		perror("sending event");
 		return;
 	}
 }
 
-void Shake_Close(Shake_Device *dev)
+void Shake_Close(const Shake_Device *dev)
 {
 	close(dev->fd);
 }

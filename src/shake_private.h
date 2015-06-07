@@ -17,8 +17,6 @@ typedef struct Shake_Device
 {
 	int fd;
 	char *node;
-	struct input_event play;
-	struct input_event stop;
 	unsigned long features[4];
 	int n_effects; /* Number of effects the device can play at the same time */
 } Shake_Device;

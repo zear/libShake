@@ -79,14 +79,14 @@ void Shake_Quit();
 void Shake_ListDevices();
 int Shake_NumOfDevices();
 Shake_Device *Shake_Open(unsigned int id);
-void Shake_Close(Shake_Device *dev);
+void Shake_Close(const Shake_Device *dev);
 int Shake_Query(Shake_Device *dev);
-void Shake_SetGain(Shake_Device *dev, int gain);
+void Shake_SetGain(const Shake_Device *dev, int gain);
 void Shake_InitEffect(Shake_Effect *effect, Shake_EffectType type);
-int Shake_UploadEffect(Shake_Device *dev, Shake_Effect effect);
-void Shake_EraseEffect(Shake_Device *dev, int id);
-void Shake_Play(Shake_Device *dev, int id);
-void Shake_Stop(Shake_Device *dev, int id);
+int Shake_UploadEffect(const Shake_Device *dev, Shake_Effect effect);
+void Shake_EraseEffect(const Shake_Device *dev, int id);
+void Shake_Play(const Shake_Device *dev, int id);
+void Shake_Stop(const Shake_Device *dev, int id);
 
 #ifdef __cplusplus
 }
