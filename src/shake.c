@@ -18,6 +18,7 @@ unsigned int numOfDevices;
 /* Prototypes */
 
 int Shake_Probe(Shake_Device *dev);
+int Shake_Query(Shake_Device *dev);
 
 /* Helper functions */
 

@@ -79,7 +79,6 @@ void Shake_Quit();
 int Shake_NumOfDevices();
 Shake_Device *Shake_Open(unsigned int id);
 void Shake_Close(const Shake_Device *dev);
-int Shake_Query(Shake_Device *dev);
 void Shake_SetGain(const Shake_Device *dev, int gain);
 void Shake_InitEffect(Shake_Effect *effect, Shake_EffectType type);
 int Shake_UploadEffect(const Shake_Device *dev, Shake_Effect effect);
