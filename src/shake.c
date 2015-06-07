@@ -5,7 +5,6 @@
 #include <fcntl.h>
 #include <linux/input.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -143,8 +142,6 @@ int Shake_Init()
 
 		free(nameList);
 	}
-
-	printf("Detected devices: %d\n", numOfDevices);
 }
 
 void Shake_Quit()
@@ -165,17 +162,6 @@ void Shake_Quit()
 		}
 
 		listElementDeleteAll(listHead);
-	}
-}
-
-void Shake_ListDevices()
-{
-	listElement *curElem;
-	int i;
-
-	for (curElem = listHead, i = 0; curElem != NULL; curElem = curElem->next, ++i)
-	{
-		printf("%d) %s\n", i, curElem->dev->node);
 	}
 }
 
@@ -351,7 +337,6 @@ void Shake_Play(const Shake_Device *dev, int id)
 	if(id < 0)
 		return;
 
-/*	printf("Playing effect #%d for a duration of %d ms\n", dev->effect.type, dev->effect.replay.length);*/
 	struct input_event play;
 	play.type = EV_FF;
 	play.code = id; /* the id we got when uploading the effect */

@@ -1,4 +1,5 @@
 #include "shake.h"
+#include <stdio.h>
 
 int main()
 {
@@ -7,7 +8,7 @@ int main()
 	int id;
 
 	Shake_Init();
-	Shake_ListDevices();
+	printf("Detected devices: %d\n", Shake_NumOfDevices());
 
 	if (Shake_NumOfDevices() > 0)
 	{

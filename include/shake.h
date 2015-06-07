@@ -76,7 +76,6 @@ typedef struct Shake_Effect
 /* libShake functions */
 int Shake_Init();
 void Shake_Quit();
-void Shake_ListDevices();
 int Shake_NumOfDevices();
 Shake_Device *Shake_Open(unsigned int id);
 void Shake_Close(const Shake_Device *dev);
