@@ -297,7 +297,7 @@ int shakeUploadEffect(shakeDev *dev, shakeEffect effect)
 	{
 		e.type = FF_PERIODIC;
 		e.id = -1;
-		e.u.periodic.waveform = effect.periodic.waveform;
+		e.u.periodic.waveform = FF_SQUARE + effect.periodic.waveform;
 		e.u.periodic.period = effect.periodic.period;
 		e.u.periodic.magnitude = effect.periodic.magnitude;
 		e.u.periodic.offset = effect.periodic.offset;

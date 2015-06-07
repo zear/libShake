@@ -14,9 +14,10 @@ int main()
 		device = shakeOpen(0);
 
 		shakeInitEffect(&effect, SHAKE_EFFECT_PERIODIC);
+		effect.periodic.waveform = SHAKE_PERIODIC_SINE;
 		effect.periodic.period = 0.1*0x100;
 		effect.periodic.magnitude = 0x6000;
-		effect.common.length = 2000;
+		effect.length = 2000;
 
 		id = shakeUploadEffect(device, effect);
 		shakePlay(device, id);

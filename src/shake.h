@@ -8,6 +8,17 @@ extern "C" {
 struct shakeDev;
 typedef struct shakeDev shakeDev;
 
+typedef enum shakePeriodicWaveform
+{
+	SHAKE_PERIODIC_SQUARE = 0,
+	SHAKE_PERIODIC_TRIANGLE,
+	SHAKE_PERIODIC_SINE,
+	SHAKE_PERIODIC_SAW_UP,
+	SHAKE_PERIODIC_SAW_DOWN,
+	SHAKE_PERIODIC_CUSTOM,
+	SHAKE_PERIODIC_COUNT
+} ShakePeriodicWaveform;
+
 typedef enum shakeEffectType
 {
 	/* Force feedback effects */
