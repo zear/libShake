@@ -10,8 +10,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "shake_private.h"
 #include "shake.h"
+#include "shake_private.h"
 
 listElement *listHead;
 unsigned int numOfDevices;
@@ -271,8 +271,9 @@ void shakeInitEffect(shakeEffect *effect, shakeEffectType type)
 {
 	if (!effect)
 		return;
+	memset(effect, 0, sizeof(*effect));
 	if (type < 0 || type >= SHAKE_EFFECT_COUNT)
-			perror("Unsupported effect");
+		perror("Unsupported effect");
 	effect->type = type;
 	effect->id = -1;
 }
