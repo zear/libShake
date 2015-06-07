@@ -5,9 +5,54 @@
 extern "C" {
 #endif
 
-#include "shake_private.h"
-
 struct shakeDev;
+typedef struct shakeDev shakeDev;
+
+typedef enum shakeEffectType
+{
+	/* Force feedback effects */
+	SHAKE_EFFECT_RUMBLE = 0,
+	SHAKE_EFFECT_PERIODIC,
+	SHAKE_EFFECT_CONSTANT,
+	SHAKE_EFFECT_SPRING,
+	SHAKE_EFFECT_FRICTION,
+	SHAKE_EFFECT_DAMPER,
+	SHAKE_EFFECT_INERTIA,
+	SHAKE_EFFECT_RAMP,
+	SHAKE_EFFECT_COUNT
+} shakeEffectType;
+
+typedef struct ShakeEffectRumble
+{
+	int strongMagnitude;
+	int weakMagnitude;
+} ShakeEffectRumble;
+
+typedef struct ShakeEffectPeriodic
+{
+	int waveform;
+	int period;
+	int magnitude;
+	int offset;
+	int phase;
+
+	// envelope
+
+	int customLen;
+	// custom data
+} ShakeEffectPeriodic;
+
+typedef struct ShakeEffect
+{
+	shakeEffectType type;
+	int id;
+	int length;
+	int delay;
+	union {
+		ShakeEffectRumble rumble;
+		ShakeEffectPeriodic periodic;
+	};
+} shakeEffect;
 
 /* libShake functions */
 int shakeInit();

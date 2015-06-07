@@ -1,5 +1,6 @@
 /* libShake - a basic haptic library */
 
+#include <unistd.h>
 #include <dirent.h>
 #include <fcntl.h>
 #include <linux/input.h>
@@ -9,11 +10,15 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "shake.h"
 #include "shake_private.h"
+#include "shake.h"
 
 listElement *listHead;
 unsigned int numOfDevices;
+
+/* Prototypes */
+
+int shakeProbe(shakeDev *dev);
 
 /* Helper functions */
 
@@ -266,42 +271,10 @@ void shakeInitEffect(shakeEffect *effect, shakeEffectType type)
 {
 	if (!effect)
 		return;
-
-	switch (type)
-	{
-		case SHAKE_EFFECT_RUMBLE:
-			memset(&effect->rumble, 0, sizeof(ShakeEffectRumble));
-		break;
-		case SHAKE_EFFECT_PERIODIC:
-			memset(&effect->periodic, 0, sizeof(ShakeEffectPeriodic));
-			effect->periodic.waveform = FF_SINE; // temp
-		break;
-		case SHAKE_EFFECT_CONSTANT:
-			memset(&effect->constant, 0, sizeof(ShakeEffectConstant));
-		break;
-		case SHAKE_EFFECT_SPRING:
-			memset(&effect->spring, 0, sizeof(ShakeEffectSpring));
-		break;
-		case SHAKE_EFFECT_FRICTION:
-			memset(&effect->friction, 0, sizeof(ShakeEffectFriction));
-		break;
-		case SHAKE_EFFECT_DAMPER:
-			memset(&effect->damper, 0, sizeof(ShakeEffectDamper));
-		break;
-		case SHAKE_EFFECT_INERTIA:
-			memset(&effect->inertia, 0, sizeof(ShakeEffectInertia));
-		break;
-		case SHAKE_EFFECT_RAMP:
-			memset(&effect->ramp, 0, sizeof(ShakeEffectRamp));
-		break;
-
-		default:
+	if (type < 0 || type > SHAKE_EFFECT_COUNT)
 			perror("Unsupported effect");
-		break;
-	}
-
-	effect->common.type = type;
-	effect->common.id = -1;
+	effect->type = type;
+	effect->id = -1;
 }
 
 int shakeUploadEffect(shakeDev *dev, shakeEffect effect)
@@ -311,16 +284,16 @@ int shakeUploadEffect(shakeDev *dev, shakeEffect effect)
 	if (!dev)
 		return -1;
 
-	if(effect.common.type == SHAKE_EFFECT_RUMBLE)
+	if(effect.type == SHAKE_EFFECT_RUMBLE)
 	{
 		e.type = FF_RUMBLE;
 		e.id = -1;
 		e.u.rumble.strong_magnitude = effect.rumble.strongMagnitude;
 		e.u.rumble.weak_magnitude   = effect.rumble.weakMagnitude;
-		e.replay.delay  = effect.common.delay;
-		e.replay.length = effect.common.length;
+		e.replay.delay  = effect.delay;
+		e.replay.length = effect.length;
 	}
-	else if(effect.common.type == SHAKE_EFFECT_PERIODIC)
+	else if(effect.type == SHAKE_EFFECT_PERIODIC)
 	{
 		e.type = FF_PERIODIC;
 		e.id = -1;
@@ -336,8 +309,8 @@ int shakeUploadEffect(shakeDev *dev, shakeEffect effect)
 		e.u.periodic.envelope.fade_level  = 0;
 		e.trigger.button = 0;
 		e.trigger.interval = 0;
-		e.replay.delay = effect.common.delay;
-		e.replay.length = effect.common.length;
+		e.replay.delay = effect.delay;
+		e.replay.length = effect.length;
 	}
 	else
 	{
