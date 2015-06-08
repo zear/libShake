@@ -86,6 +86,9 @@ void Shake_EraseEffect(const Shake_Device *dev, int id);
 void Shake_Play(const Shake_Device *dev, int id);
 void Shake_Stop(const Shake_Device *dev, int id);
 
+void Shake_SimplePeriodic(Shake_Effect *effect, Shake_PeriodicWaveform waveform, float forcePercent, float attackSecs, float sustainSecs, float fadeSecs);
+void Shake_SimpleRumble(Shake_Effect *effect, float strongPercent, float weakPercent, float secs);
+
 #ifdef __cplusplus
 }
 #endif
