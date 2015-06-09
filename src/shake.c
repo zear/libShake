@@ -144,6 +144,8 @@ int Shake_Init()
 
 		free(nameList);
 	}
+
+	return 0;
 }
 
 void Shake_Quit()
