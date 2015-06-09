@@ -14,7 +14,7 @@ SRC          := $(wildcard $(SRCDIR)/*.c)
 OBJ          := $(SRC:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 
 ifdef DEBUG
-  CFLAGS += -ggdb
+  CFLAGS += -ggdb -Wall -Werror
 else
   CFLAGS += -O2
 endif
