@@ -249,11 +249,15 @@ int Shake_EffectCapacity(Shake_Device *dev)
 
 int Shake_QueryEffectType(Shake_Device *dev, Shake_EffectType type)
 {
+	/* Starts at a magic, non-zero number, FF_RUMBLE.
+	   Increments respectively to EffectType. */
 	return test_bit(FF_RUMBLE + type, dev->features) ? 1 : 0;
 }
 
 int Shake_QueryPeriodicWaveform(Shake_Device *dev, Shake_PeriodicWaveform waveform)
 {
+	/* Starts at a magic, non-zero number, FF_SQUARLE.
+	   Increments respectively to PeriodicWaveform. */
 	return test_bit(FF_SQUARE + waveform, dev->features) ? 1 : 0;
 }
 
