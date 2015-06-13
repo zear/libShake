@@ -11,14 +11,16 @@
 #define BIT(x)			(1UL<<OFF(x))
 #define LONG(x)			((x)/BITS_PER_LONG)
 #define test_bit(bit, array)	((array[LONG(bit)] >> OFF(bit)) & 1)
+#define BITS_TO_LONGS(x) \
+	(((x) + 8 * sizeof (unsigned long) - 1) / (8 * sizeof (unsigned long)))
 
 
 typedef struct Shake_Device
 {
 	int fd;
 	char *node;
-	unsigned long features[4];
-	int n_effects; /* Number of effects the device can play at the same time */
+	unsigned long features[BITS_TO_LONGS(FF_CNT)];
+	int capacity; /* Number of effects the device can play at the same time */
 } Shake_Device;
 
 typedef struct listElement

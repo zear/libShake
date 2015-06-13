@@ -209,6 +209,9 @@ Shake_Device *Shake_Open(unsigned int id)
 
 int Shake_Query(Shake_Device *dev)
 {
+	int size = sizeof(dev->features)/sizeof(unsigned long);
+	int i;
+
 	if(!dev)
 		return -1;
 
@@ -218,24 +221,45 @@ int Shake_Query(Shake_Device *dev)
 		return -1;
 	}
 
-/*	printf("Effect id:\tEffect name:\n");*/
-/*	if (test_bit(FF_CONSTANT, dev->features)) printf("#%d\t\tConstant\n", FF_CONSTANT);*/
-/*	if (test_bit(FF_PERIODIC, dev->features)) printf("#%d\t\tPeriodic\n", FF_PERIODIC);*/
-/*	if (test_bit(FF_SPRING, dev->features))   printf("#%d\t\tSpring\n", FF_SPRING);*/
-/*	if (test_bit(FF_FRICTION, dev->features)) printf("#%d\t\tFriction\n", FF_FRICTION);*/
-/*	if (test_bit(FF_RUMBLE, dev->features))   printf("#%d\t\tRumble\n", FF_RUMBLE);*/
-/*	printf("-end-\n");*/
+	for (i = 0; i < size; ++i)
+	{
+		if (dev->features[i])
+			break;
+	}
 
-	if (!dev->features[0] && !dev->features[1] && !dev->features[2] && !dev->features[3])
-		return 1;
+	if (i >= size) /* Device doesn't support any force feedback effects. Ignore it. */
+		return -1;
 
-	if (ioctl(dev->fd, EVIOCGEFFECTS, &dev->n_effects) == -1)
+	if (ioctl(dev->fd, EVIOCGEFFECTS, &dev->capacity) == -1)
 	{
 /*		perror("Ioctl query");*/
 		return -1;
 	}
 
+	if (dev->capacity <= 0) /* Device doesn't support uploading effects. Ignore it. */
+		return -1;
+
 	return 0;
+}
+
+int Shake_EffectCapacity(Shake_Device *dev)
+{
+	return dev->capacity;
+}
+
+int Shake_QueryEffectType(Shake_Device *dev, Shake_EffectType type)
+{
+	return test_bit(FF_RUMBLE + type, dev->features) ? 1 : 0;
+}
+
+int Shake_QueryPeriodicWaveform(Shake_Device *dev, Shake_PeriodicWaveform waveform)
+{
+	return test_bit(FF_SQUARE + waveform, dev->features) ? 1 : 0;
+}
+
+int Shake_QueryGainAdjustable(Shake_Device *dev)
+{
+	return test_bit(FF_GAIN, dev->features) ? 1 : 0;
 }
 
 void Shake_SetGain(const Shake_Device *dev, int gain)
