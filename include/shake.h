@@ -85,7 +85,7 @@ int Shake_QueryPeriodicWaveform(Shake_Device *dev, Shake_PeriodicWaveform wavefo
 int Shake_QueryGainAdjustable(Shake_Device *dev);
 void Shake_SetGain(const Shake_Device *dev, int gain);
 void Shake_InitEffect(Shake_Effect *effect, Shake_EffectType type);
-int Shake_UploadEffect(const Shake_Device *dev, Shake_Effect effect);
+int Shake_UploadEffect(const Shake_Device *dev, Shake_Effect *effect);
 void Shake_EraseEffect(const Shake_Device *dev, int id);
 void Shake_Play(const Shake_Device *dev, int id);
 void Shake_Stop(const Shake_Device *dev, int id);

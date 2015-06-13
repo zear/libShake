@@ -52,7 +52,7 @@ int main()
 		effect.length				= 2000;
 		effect.delay				= 0;
 
-		id = Shake_UploadEffect(device, effect);
+		id = Shake_UploadEffect(device, &effect);
 		Shake_Play(device, id);
 
 		sleep(2);

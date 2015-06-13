@@ -296,40 +296,40 @@ void Shake_InitEffect(Shake_Effect *effect, Shake_EffectType type)
 	effect->id = -1;
 }
 
-int Shake_UploadEffect(const Shake_Device *dev, Shake_Effect effect)
+int Shake_UploadEffect(const Shake_Device *dev, Shake_Effect *effect)
 {
 	struct ff_effect e;
 
 	if (!dev)
 		return -1;
 
-	if(effect.type == SHAKE_EFFECT_RUMBLE)
+	if(effect->type == SHAKE_EFFECT_RUMBLE)
 	{
 		e.type = FF_RUMBLE;
 		e.id = -1;
-		e.u.rumble.strong_magnitude = effect.rumble.strongMagnitude;
-		e.u.rumble.weak_magnitude = effect.rumble.weakMagnitude;
-		e.replay.delay = effect.delay;
-		e.replay.length = effect.length;
+		e.u.rumble.strong_magnitude = effect->rumble.strongMagnitude;
+		e.u.rumble.weak_magnitude = effect->rumble.weakMagnitude;
+		e.replay.delay = effect->delay;
+		e.replay.length = effect->length;
 	}
-	else if(effect.type == SHAKE_EFFECT_PERIODIC)
+	else if(effect->type == SHAKE_EFFECT_PERIODIC)
 	{
 		e.type = FF_PERIODIC;
 		e.id = -1;
-		e.u.periodic.waveform = FF_SQUARE + effect.periodic.waveform;
-		e.u.periodic.period = effect.periodic.period;
-		e.u.periodic.magnitude = effect.periodic.magnitude;
-		e.u.periodic.offset = effect.periodic.offset;
-		e.u.periodic.phase = effect.periodic.phase;
-		e.u.periodic.envelope.attack_length = effect.periodic.envelope.attackLength;
-		e.u.periodic.envelope.attack_level = effect.periodic.envelope.attackLevel;
-		e.u.periodic.envelope.fade_length = effect.periodic.envelope.fadeLength;
-		e.u.periodic.envelope.fade_level = effect.periodic.envelope.fadeLevel;
+		e.u.periodic.waveform = FF_SQUARE + effect->periodic.waveform;
+		e.u.periodic.period = effect->periodic.period;
+		e.u.periodic.magnitude = effect->periodic.magnitude;
+		e.u.periodic.offset = effect->periodic.offset;
+		e.u.periodic.phase = effect->periodic.phase;
+		e.u.periodic.envelope.attack_length = effect->periodic.envelope.attackLength;
+		e.u.periodic.envelope.attack_level = effect->periodic.envelope.attackLevel;
+		e.u.periodic.envelope.fade_length = effect->periodic.envelope.fadeLength;
+		e.u.periodic.envelope.fade_level = effect->periodic.envelope.fadeLevel;
 		e.trigger.button = 0;
 		e.trigger.interval = 0;
-		e.direction = effect.direction;
-		e.replay.delay = effect.delay;
-		e.replay.length = effect.length;
+		e.direction = effect->direction;
+		e.replay.delay = effect->delay;
+		e.replay.length = effect->length;
 	}
 	else
 	{
