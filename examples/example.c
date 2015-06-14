@@ -1,4 +1,4 @@
-#include "shake.h"
+#include <shake.h>
 #include <stdio.h>
 
 void deviceInfo(Shake_Device *device)
