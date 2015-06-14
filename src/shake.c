@@ -247,23 +247,28 @@ int Shake_EffectCapacity(Shake_Device *dev)
 	return dev->capacity;
 }
 
-int Shake_QueryEffectType(Shake_Device *dev, Shake_EffectType type)
+int Shake_QueryEffectSupport(Shake_Device *dev, Shake_EffectType type)
 {
 	/* Starts at a magic, non-zero number, FF_RUMBLE.
 	   Increments respectively to EffectType. */
 	return test_bit(FF_RUMBLE + type, dev->features) ? 1 : 0;
 }
 
-int Shake_QueryPeriodicWaveform(Shake_Device *dev, Shake_PeriodicWaveform waveform)
+int Shake_QueryWaveformSupport(Shake_Device *dev, Shake_PeriodicWaveform waveform)
 {
 	/* Starts at a magic, non-zero number, FF_SQUARLE.
 	   Increments respectively to PeriodicWaveform. */
 	return test_bit(FF_SQUARE + waveform, dev->features) ? 1 : 0;
 }
 
-int Shake_QueryGainAdjustable(Shake_Device *dev)
+int Shake_QueryGainSupport(Shake_Device *dev)
 {
 	return test_bit(FF_GAIN, dev->features) ? 1 : 0;
+}
+
+int Shake_QueryAutocenterSupport(Shake_Device *dev)
+{
+	return test_bit(FF_AUTOCENTER, dev->features) ? 1 : 0;
 }
 
 void Shake_SetGain(const Shake_Device *dev, int gain)
@@ -282,6 +287,25 @@ void Shake_SetGain(const Shake_Device *dev, int gain)
 	if (write(dev->fd, &ie, sizeof(ie)) == -1)
 	{
 		perror("set gain");
+	}
+}
+
+void Shake_SetAutocenter(const Shake_Device *dev, int autocenter)
+{
+	struct input_event ie;
+
+	if (autocenter < 0)
+		autocenter = 0;
+	if (autocenter > 100)
+		autocenter = 100;
+
+	ie.type = EV_FF;
+	ie.code = FF_AUTOCENTER;
+	ie.value = 0xFFFFUL * autocenter / 100;
+
+	if (write(dev->fd, &ie, sizeof(ie)) == -1)
+	{
+		perror("set auto-center");
 	}
 }
 
