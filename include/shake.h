@@ -55,9 +55,6 @@ typedef struct Shake_EffectPeriodic
 	int offset;
 	int phase;
 	Shake_Envelope envelope;
-
-	int customLen;
-	// custom data
 } Shake_EffectPeriodic;
 
 typedef struct Shake_Effect
@@ -67,7 +64,8 @@ typedef struct Shake_Effect
 	int direction;
 	int length;
 	int delay;
-	union {
+	union
+	{
 		Shake_EffectRumble rumble;
 		Shake_EffectPeriodic periodic;
 	};
