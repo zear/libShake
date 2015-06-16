@@ -19,6 +19,8 @@ typedef struct Shake_Device
 {
 	int fd;
 	char *node;
+	char name[128];
+	int id;
 	unsigned long features[BITS_TO_LONGS(FF_CNT)];
 	int capacity; /* Number of effects the device can play at the same time */
 } Shake_Device;

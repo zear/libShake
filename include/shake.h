@@ -77,6 +77,8 @@ void Shake_Quit();
 int Shake_NumOfDevices();
 Shake_Device *Shake_Open(unsigned int id);
 void Shake_Close(const Shake_Device *dev);
+int Shake_GetId(const Shake_Device *dev);
+const char *Shake_GetName(const Shake_Device *dev);
 int Shake_EffectCapacity(Shake_Device *dev);
 int Shake_QueryEffectSupport(Shake_Device *dev, Shake_EffectType type);
 int Shake_QueryWaveformSupport(Shake_Device *dev, Shake_PeriodicWaveform waveform);

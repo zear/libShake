@@ -134,11 +134,13 @@ int Shake_Init()
 
 			if (Shake_Probe(&dev))
 			{
+				dev.id = numOfDevices;
 				listHead = listElementPrepend(listHead);
 				listHead->dev = malloc(sizeof(Shake_Device));
 				memcpy(listHead->dev, &dev, sizeof(Shake_Device));
 				++numOfDevices;
 			}
+
 			free(nameList[i]);
 		}
 
@@ -239,7 +241,22 @@ int Shake_Query(Shake_Device *dev)
 	if (dev->capacity <= 0) /* Device doesn't support uploading effects. Ignore it. */
 		return -1;
 
+	if (ioctl(dev->fd, EVIOCGNAME(sizeof(dev->name)), dev->name) == -1) /* Get device name */
+	{
+		strncpy(dev->name, "Unknown", sizeof(dev->name));
+	}
+
 	return 0;
+}
+
+int Shake_GetId(const Shake_Device *dev)
+{
+	return dev ? dev->id : -1;
+}
+
+const char *Shake_GetName(const Shake_Device *dev)
+{
+	return dev ? dev->name : NULL;
 }
 
 int Shake_EffectCapacity(Shake_Device *dev)
