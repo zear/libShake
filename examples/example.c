@@ -3,11 +3,11 @@
 
 void deviceInfo(Shake_Device *device)
 {
-	printf("\nDevice #%d\n", Shake_GetId(device));
-	printf(" Name: %s\n", Shake_GetName(device));
+	printf("\nDevice #%d\n", Shake_DeviceId(device));
+	printf(" Name: %s\n", Shake_DeviceName(device));
 	printf(" Adjustable gain: %s\n", Shake_QueryGainSupport(device) ? "yes" : "no");
 	printf(" Adjustable autocenter: %s\n", Shake_QueryAutocenterSupport(device) ? "yes" : "no");
-	printf(" Effect capacity: %d\n", Shake_EffectCapacity(device));
+	printf(" Effect capacity: %d\n", Shake_DeviceEffectCapacity(device));
 	printf(" Supported effects:\n");
 	if (Shake_QueryEffectSupport(device, SHAKE_EFFECT_RUMBLE)) printf(" SHAKE_EFFECT_RUMBLE\n");
 	if (Shake_QueryEffectSupport(device, SHAKE_EFFECT_PERIODIC))

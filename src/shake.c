@@ -249,19 +249,19 @@ int Shake_Query(Shake_Device *dev)
 	return 0;
 }
 
-int Shake_GetId(const Shake_Device *dev)
+int Shake_DeviceId(const Shake_Device *dev)
 {
 	return dev ? dev->id : -1;
 }
 
-const char *Shake_GetName(const Shake_Device *dev)
+const char *Shake_DeviceName(const Shake_Device *dev)
 {
 	return dev ? dev->name : NULL;
 }
 
-int Shake_EffectCapacity(Shake_Device *dev)
+int Shake_DeviceEffectCapacity(const Shake_Device *dev)
 {
-	return dev->capacity;
+	return dev ? dev->capacity : -1;
 }
 
 int Shake_QueryEffectSupport(Shake_Device *dev, Shake_EffectType type)
