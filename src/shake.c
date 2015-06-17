@@ -273,7 +273,7 @@ int Shake_QueryEffectSupport(Shake_Device *dev, Shake_EffectType type)
 
 int Shake_QueryWaveformSupport(Shake_Device *dev, Shake_PeriodicWaveform waveform)
 {
-	/* Starts at a magic, non-zero number, FF_SQUARLE.
+	/* Starts at a magic, non-zero number, FF_SQUARE.
 	   Increments respectively to PeriodicWaveform. */
 	return test_bit(FF_SQUARE + waveform, dev->features) ? 1 : 0;
 }
