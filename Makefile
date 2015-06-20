@@ -40,3 +40,4 @@ clean:
 
 install:
 	cp include/*.h $(SYSROOT)/usr/include/
+	cp $(TARGET) $(SYSROOT)/usr/lib/
