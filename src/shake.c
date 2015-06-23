@@ -199,7 +199,7 @@ Shake_Device *Shake_Open(unsigned int id)
 	if (id >= numOfDevices)
 		return NULL;
 
-	listElement *element = listElementGet(listHead, id);
+	listElement *element = listElementGet(listHead, numOfDevices - 1 - id);
 
 	if(!element->dev || !element->dev->node)
 		return NULL;
