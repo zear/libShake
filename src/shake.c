@@ -264,26 +264,26 @@ int Shake_DeviceEffectCapacity(const Shake_Device *dev)
 	return dev ? dev->capacity : -1;
 }
 
-int Shake_QueryEffectSupport(Shake_Device *dev, Shake_EffectType type)
+int Shake_QueryEffectSupport(const Shake_Device *dev, Shake_EffectType type)
 {
 	/* Starts at a magic, non-zero number, FF_RUMBLE.
 	   Increments respectively to EffectType. */
 	return test_bit(FF_RUMBLE + type, dev->features) ? 1 : 0;
 }
 
-int Shake_QueryWaveformSupport(Shake_Device *dev, Shake_PeriodicWaveform waveform)
+int Shake_QueryWaveformSupport(const Shake_Device *dev, Shake_PeriodicWaveform waveform)
 {
 	/* Starts at a magic, non-zero number, FF_SQUARE.
 	   Increments respectively to PeriodicWaveform. */
 	return test_bit(FF_SQUARE + waveform, dev->features) ? 1 : 0;
 }
 
-int Shake_QueryGainSupport(Shake_Device *dev)
+int Shake_QueryGainSupport(const Shake_Device *dev)
 {
 	return test_bit(FF_GAIN, dev->features) ? 1 : 0;
 }
 
-int Shake_QueryAutocenterSupport(Shake_Device *dev)
+int Shake_QueryAutocenterSupport(const Shake_Device *dev)
 {
 	return test_bit(FF_AUTOCENTER, dev->features) ? 1 : 0;
 }
