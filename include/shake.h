@@ -5,6 +5,10 @@
 extern "C" {
 #endif
 
+#define SHAKE_MAJOR_VERSION 0
+#define SHAKE_MINOR_VERSION 0
+#define SHAKE_PATCH_VERSION 9
+
 struct Shake_Device;
 typedef struct Shake_Device Shake_Device;
 
@@ -80,10 +84,10 @@ void Shake_Close(const Shake_Device *dev);
 int Shake_DeviceId(const Shake_Device *dev);
 const char *Shake_DeviceName(const Shake_Device *dev);
 int Shake_DeviceEffectCapacity(const Shake_Device *dev);
-int Shake_QueryEffectSupport(Shake_Device *dev, Shake_EffectType type);
-int Shake_QueryWaveformSupport(Shake_Device *dev, Shake_PeriodicWaveform waveform);
-int Shake_QueryGainSupport(Shake_Device *dev);
-int Shake_QueryAutocenterSupport(Shake_Device *dev);
+int Shake_QueryEffectSupport(const Shake_Device *dev, Shake_EffectType type);
+int Shake_QueryWaveformSupport(const Shake_Device *dev, Shake_PeriodicWaveform waveform);
+int Shake_QueryGainSupport(const Shake_Device *dev);
+int Shake_QueryAutocenterSupport(const Shake_Device *dev);
 void Shake_SetGain(const Shake_Device *dev, int gain);
 void Shake_SetAutocenter(const Shake_Device *dev, int autocenter);
 void Shake_InitEffect(Shake_Effect *effect, Shake_EffectType type);
