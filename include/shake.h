@@ -5,6 +5,10 @@
 extern "C" {
 #endif
 
+#define SHAKE_MAJOR_VERSION 0
+#define SHAKE_MINOR_VERSION 0
+#define SHAKE_PATCH_VERSION 9
+
 struct Shake_Device;
 typedef struct Shake_Device Shake_Device;
 
