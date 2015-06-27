@@ -372,6 +372,35 @@ int Shake_UploadEffect(const Shake_Device *dev, Shake_Effect *effect)
 		e.replay.delay = effect->delay;
 		e.replay.length = effect->length;
 	}
+	else if(effect->type == SHAKE_EFFECT_CONSTANT)
+	{
+		e.type = FF_CONSTANT;
+		e.id = -1;
+		e.u.constant.level = effect->constant.level;
+		e.u.constant.envelope.attack_length = effect->constant.envelope.attackLength;
+		e.u.constant.envelope.attack_level = effect->constant.envelope.attackLevel;
+		e.u.constant.envelope.fade_length = effect->constant.envelope.fadeLength;
+		e.u.constant.envelope.fade_level = effect->constant.envelope.fadeLevel;
+		e.trigger.button = 0;
+		e.trigger.interval = 0;
+		e.replay.delay = effect->delay;
+		e.replay.length = effect->length;
+	}
+	else if(effect->type == SHAKE_EFFECT_RAMP)
+	{
+		e.type = FF_RAMP;
+		e.id = -1;
+		e.u.ramp.start_level = effect->ramp.startLevel;
+		e.u.ramp.end_level = effect->ramp.endLevel;
+		e.u.ramp.envelope.attack_length = effect->ramp.envelope.attackLength;
+		e.u.ramp.envelope.attack_level = effect->ramp.envelope.attackLevel;
+		e.u.ramp.envelope.fade_length = effect->ramp.envelope.fadeLength;
+		e.u.ramp.envelope.fade_level = effect->ramp.envelope.fadeLevel;
+		e.trigger.button = 0;
+		e.trigger.interval = 0;
+		e.replay.delay = effect->delay;
+		e.replay.length = effect->length;
+	}
 	else
 	{
 		perror("Unsupported effect");
