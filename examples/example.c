@@ -1,5 +1,6 @@
 #include <shake.h>
 #include <stdio.h>
+#include <unistd.h>
 
 void deviceInfo(Shake_Device *device)
 {
