@@ -343,11 +343,15 @@ int Shake_UploadEffect(const Shake_Device *dev, Shake_Effect *effect)
 
 	if (!dev)
 		return -1;
+	if (!effect)
+		return -1;
+	if (effect->id < -1)
+		return -1;
 
 	if(effect->type == SHAKE_EFFECT_RUMBLE)
 	{
 		e.type = FF_RUMBLE;
-		e.id = -1;
+		e.id = effect->id;
 		e.u.rumble.strong_magnitude = effect->rumble.strongMagnitude;
 		e.u.rumble.weak_magnitude = effect->rumble.weakMagnitude;
 		e.replay.delay = effect->delay;
@@ -356,7 +360,7 @@ int Shake_UploadEffect(const Shake_Device *dev, Shake_Effect *effect)
 	else if(effect->type == SHAKE_EFFECT_PERIODIC)
 	{
 		e.type = FF_PERIODIC;
-		e.id = -1;
+		e.id = effect->id;
 		e.u.periodic.waveform = FF_SQUARE + effect->periodic.waveform;
 		e.u.periodic.period = effect->periodic.period;
 		e.u.periodic.magnitude = effect->periodic.magnitude;
@@ -375,7 +379,7 @@ int Shake_UploadEffect(const Shake_Device *dev, Shake_Effect *effect)
 	else if(effect->type == SHAKE_EFFECT_CONSTANT)
 	{
 		e.type = FF_CONSTANT;
-		e.id = -1;
+		e.id = effect->id;
 		e.u.constant.level = effect->constant.level;
 		e.u.constant.envelope.attack_length = effect->constant.envelope.attackLength;
 		e.u.constant.envelope.attack_level = effect->constant.envelope.attackLevel;
@@ -389,7 +393,7 @@ int Shake_UploadEffect(const Shake_Device *dev, Shake_Effect *effect)
 	else if(effect->type == SHAKE_EFFECT_RAMP)
 	{
 		e.type = FF_RAMP;
-		e.id = -1;
+		e.id = effect->id;
 		e.u.ramp.start_level = effect->ramp.startLevel;
 		e.u.ramp.end_level = effect->ramp.endLevel;
 		e.u.ramp.envelope.attack_length = effect->ramp.envelope.attackLength;
