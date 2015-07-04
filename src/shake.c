@@ -292,6 +292,9 @@ void Shake_SetGain(const Shake_Device *dev, int gain)
 {
 	struct input_event ie;
 
+	if (!dev)
+		return;
+
 	if (gain < 0)
 		gain = 0;
 	if (gain > 100)
@@ -310,6 +313,9 @@ void Shake_SetGain(const Shake_Device *dev, int gain)
 void Shake_SetAutocenter(const Shake_Device *dev, int autocenter)
 {
 	struct input_event ie;
+
+	if (!dev)
+		return;
 
 	if (autocenter < 0)
 		autocenter = 0;
@@ -477,5 +483,8 @@ void Shake_Stop(const Shake_Device *dev, int id)
 
 void Shake_Close(const Shake_Device *dev)
 {
+	if (!dev)
+		return;
+
 	close(dev->fd);
 }
