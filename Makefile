@@ -39,6 +39,6 @@ $(OBJDIR):
 clean:
 	rm -Rf $(TARGET) $(OBJDIR)
 
-install:
+install: $(TARGET)
 	cp include/*.h $(SYSROOT)/usr/include/
 	cp $(TARGET) $(SYSROOT)/usr/lib/
