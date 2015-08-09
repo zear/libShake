@@ -5,7 +5,7 @@ endif
 
 CC           ?= gcc
 STRIP        ?= strip
-TARGET       ?= example
+TARGET       ?= simple listDevices
 LDFLAGS	     := -L.. -lshake
 CFLAGS       := -fPIC -I../include
 SRCDIR       := .
