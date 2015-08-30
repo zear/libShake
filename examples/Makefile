@@ -5,13 +5,10 @@ endif
 
 CC           ?= gcc
 STRIP        ?= strip
-TARGET       ?= example.elf
+TARGET       ?= simple listDevices
 LDFLAGS	     := -L.. -lshake
 CFLAGS       := -fPIC -I../include
 SRCDIR       := .
-OBJDIR       := obj
-SRC          := $(wildcard $(SRCDIR)/*.c)
-OBJ          := $(SRC:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 
 ifdef DEBUG
   CFLAGS += -ggdb -Wall -Werror
@@ -23,15 +20,9 @@ endif
 
 all: $(TARGET)
 
-$(TARGET): $(OBJ)
-	$(CC) $(CFLAGS) $^ $(LDFLAGS) -o $@
+$(TARGET):
+	$(CC) $(CFLAGS) $(SRCDIR)/$@.c $(LDFLAGS) -o $@
 	$(STRIP) $@
 
-$(OBJ): $(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
-	$(CC) -c $(CFLAGS) $< -o $@
-
-$(OBJDIR):
-	mkdir -p $@
-
 clean:
-	rm -Rf $(TARGET) $(OBJDIR)
+	rm -Rf $(TARGET)

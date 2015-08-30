@@ -116,7 +116,7 @@ int Shake_Init()
 
 	if (numOfEntries < 0)
 	{
-		perror("scandir");
+		perror("Shake_Init: Failed to retrieve device nodes.");
 	}
 	else
 	{
@@ -219,7 +219,7 @@ int Shake_Query(Shake_Device *dev)
 
 	if (ioctl(dev->fd, EVIOCGBIT(EV_FF, sizeof(dev->features)), dev->features) == -1)
 	{
-/*		perror("Ioctl query");*/
+		perror("Shake_Query: Failed to query for device features.");
 		return -1;
 	}
 
@@ -234,7 +234,7 @@ int Shake_Query(Shake_Device *dev)
 
 	if (ioctl(dev->fd, EVIOCGEFFECTS, &dev->capacity) == -1)
 	{
-/*		perror("Ioctl query");*/
+		perror("Shake_Query: Failed to query for device effect capacity.");
 		return -1;
 	}
 
@@ -292,6 +292,9 @@ void Shake_SetGain(const Shake_Device *dev, int gain)
 {
 	struct input_event ie;
 
+	if (!dev)
+		return;
+
 	if (gain < 0)
 		gain = 0;
 	if (gain > 100)
@@ -303,13 +306,16 @@ void Shake_SetGain(const Shake_Device *dev, int gain)
 
 	if (write(dev->fd, &ie, sizeof(ie)) == -1)
 	{
-		perror("set gain");
+		perror("Shake_SetGain: Failed to set gain.");
 	}
 }
 
 void Shake_SetAutocenter(const Shake_Device *dev, int autocenter)
 {
 	struct input_event ie;
+
+	if (!dev)
+		return;
 
 	if (autocenter < 0)
 		autocenter = 0;
@@ -322,7 +328,7 @@ void Shake_SetAutocenter(const Shake_Device *dev, int autocenter)
 
 	if (write(dev->fd, &ie, sizeof(ie)) == -1)
 	{
-		perror("set auto-center");
+		perror("Shake_SetAutocenter: Failed to set auto-center.");
 	}
 }
 
@@ -332,7 +338,7 @@ void Shake_InitEffect(Shake_Effect *effect, Shake_EffectType type)
 		return;
 	memset(effect, 0, sizeof(*effect));
 	if (type < 0 || type >= SHAKE_EFFECT_COUNT)
-		perror("Unsupported effect");
+		perror("Shake_InitEffect: Unsupported effect.");
 	effect->type = type;
 	effect->id = -1;
 }
@@ -343,11 +349,15 @@ int Shake_UploadEffect(const Shake_Device *dev, Shake_Effect *effect)
 
 	if (!dev)
 		return -1;
+	if (!effect)
+		return -1;
+	if (effect->id < -1)
+		return -1;
 
 	if(effect->type == SHAKE_EFFECT_RUMBLE)
 	{
 		e.type = FF_RUMBLE;
-		e.id = -1;
+		e.id = effect->id;
 		e.u.rumble.strong_magnitude = effect->rumble.strongMagnitude;
 		e.u.rumble.weak_magnitude = effect->rumble.weakMagnitude;
 		e.replay.delay = effect->delay;
@@ -356,7 +366,7 @@ int Shake_UploadEffect(const Shake_Device *dev, Shake_Effect *effect)
 	else if(effect->type == SHAKE_EFFECT_PERIODIC)
 	{
 		e.type = FF_PERIODIC;
-		e.id = -1;
+		e.id = effect->id;
 		e.u.periodic.waveform = FF_SQUARE + effect->periodic.waveform;
 		e.u.periodic.period = effect->periodic.period;
 		e.u.periodic.magnitude = effect->periodic.magnitude;
@@ -372,15 +382,44 @@ int Shake_UploadEffect(const Shake_Device *dev, Shake_Effect *effect)
 		e.replay.delay = effect->delay;
 		e.replay.length = effect->length;
 	}
+	else if(effect->type == SHAKE_EFFECT_CONSTANT)
+	{
+		e.type = FF_CONSTANT;
+		e.id = effect->id;
+		e.u.constant.level = effect->constant.level;
+		e.u.constant.envelope.attack_length = effect->constant.envelope.attackLength;
+		e.u.constant.envelope.attack_level = effect->constant.envelope.attackLevel;
+		e.u.constant.envelope.fade_length = effect->constant.envelope.fadeLength;
+		e.u.constant.envelope.fade_level = effect->constant.envelope.fadeLevel;
+		e.trigger.button = 0;
+		e.trigger.interval = 0;
+		e.replay.delay = effect->delay;
+		e.replay.length = effect->length;
+	}
+	else if(effect->type == SHAKE_EFFECT_RAMP)
+	{
+		e.type = FF_RAMP;
+		e.id = effect->id;
+		e.u.ramp.start_level = effect->ramp.startLevel;
+		e.u.ramp.end_level = effect->ramp.endLevel;
+		e.u.ramp.envelope.attack_length = effect->ramp.envelope.attackLength;
+		e.u.ramp.envelope.attack_level = effect->ramp.envelope.attackLevel;
+		e.u.ramp.envelope.fade_length = effect->ramp.envelope.fadeLength;
+		e.u.ramp.envelope.fade_level = effect->ramp.envelope.fadeLevel;
+		e.trigger.button = 0;
+		e.trigger.interval = 0;
+		e.replay.delay = effect->delay;
+		e.replay.length = effect->length;
+	}
 	else
 	{
-		perror("Unsupported effect");
+		perror("Shake_UploadEffect: Unsupported effect.");
 		return -2;
 	}
 
 	if (ioctl(dev->fd, EVIOCSFF, &e) == -1)
 	{
-		perror("upload effect");
+		perror("Shake_UploadEffect: Failed to upload effect.");
 		return -3;
 	}
 
@@ -397,7 +436,7 @@ void Shake_EraseEffect(const Shake_Device *dev, int id)
 
 	if (ioctl(dev->fd, EVIOCRMFF, id) == -1)
 	{
-		perror("erase effect");
+		perror("Shake_EraseEffect: Failed to erase effect.");
 		return;
 	}
 }
@@ -417,7 +456,7 @@ void Shake_Play(const Shake_Device *dev, int id)
 
 	if (write(dev->fd, (const void*) &play, sizeof(play)) == -1)
 	{
-		perror("sending event");
+		perror("Shake_Play: Failed to send play event.");
 		return;
 	}
 }
@@ -437,12 +476,15 @@ void Shake_Stop(const Shake_Device *dev, int id)
 
 	if (write(dev->fd, (const void*) &stop, sizeof(stop)) == -1)
 	{
-		perror("sending event");
+		perror("Shake_Stop: Failed to send stop event.");
 		return;
 	}
 }
 
 void Shake_Close(const Shake_Device *dev)
 {
+	if (!dev)
+		return;
+
 	close(dev->fd);
 }

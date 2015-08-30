@@ -61,6 +61,19 @@ typedef struct Shake_EffectPeriodic
 	Shake_Envelope envelope;
 } Shake_EffectPeriodic;
 
+typedef struct Shake_EffectConstant
+{
+	int level;
+	Shake_Envelope envelope;
+} Shake_EffectConstant;
+
+typedef struct Shake_EffectRamp
+{
+	int startLevel;
+	int endLevel;
+	Shake_Envelope envelope;
+} Shake_EffectRamp;
+
 typedef struct Shake_Effect
 {
 	Shake_EffectType type;
@@ -72,6 +85,8 @@ typedef struct Shake_Effect
 	{
 		Shake_EffectRumble rumble;
 		Shake_EffectPeriodic periodic;
+		Shake_EffectConstant constant;
+		Shake_EffectRamp ramp;
 	};
 } Shake_Effect;
 

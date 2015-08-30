@@ -12,6 +12,7 @@ SRCDIR       := src
 OBJDIR       := obj
 SRC          := $(wildcard $(SRCDIR)/*.c)
 OBJ          := $(SRC:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
+SOVERSION    := $(TARGET).0
 
 ifdef DEBUG
   CFLAGS += -ggdb -Wall -Werror
@@ -24,7 +25,7 @@ endif
 all: $(TARGET)
 
 $(TARGET): $(OBJ)
-	$(CC) -shared $(CFLAGS) $^ -o $@
+	$(CC) -Wl,-soname,$(SOVERSION) -shared $(CFLAGS) $^ -o $@
 ifdef DO_STRIP
 	$(STRIP) $@
 endif
@@ -38,6 +39,6 @@ $(OBJDIR):
 clean:
 	rm -Rf $(TARGET) $(OBJDIR)
 
-install:
+install: $(TARGET)
 	cp include/*.h $(SYSROOT)/usr/include/
 	cp $(TARGET) $(SYSROOT)/usr/lib/
