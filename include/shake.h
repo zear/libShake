@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
 #define SHAKE_MAJOR_VERSION 0
-#define SHAKE_MINOR_VERSION 1
+#define SHAKE_MINOR_VERSION 2
 #define SHAKE_PATCH_VERSION 0
 
 struct Shake_Device;
