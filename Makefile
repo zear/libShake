@@ -5,14 +5,16 @@ endif
 
 CC           ?= gcc
 STRIP        ?= strip
-TARGET       ?= libshake.so
+NAME         := libshake.so
+SOVERSION    := 0
+SONAME       := $(NAME).$(SOVERSION)
+TARGET       ?= $(SONAME)
 SYSROOT      := $(shell $(CC) --print-sysroot)
 CFLAGS       := -fPIC
 SRCDIR       := src
 OBJDIR       := obj
 SRC          := $(wildcard $(SRCDIR)/*.c)
 OBJ          := $(SRC:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
-SOVERSION    := $(TARGET).0
 
 ifdef DEBUG
   CFLAGS += -ggdb -Wall -Werror
@@ -25,7 +27,7 @@ endif
 all: $(TARGET)
 
 $(TARGET): $(OBJ)
-	$(CC) -Wl,-soname,$(SOVERSION) -shared $(CFLAGS) $^ -o $@
+	$(CC) -Wl,-soname,$(SONAME) -shared $(CFLAGS) $^ -o $@
 ifdef DO_STRIP
 	$(STRIP) $@
 endif
@@ -42,3 +44,5 @@ clean:
 install: $(TARGET)
 	cp include/*.h $(SYSROOT)/usr/include/
 	cp $(TARGET) $(SYSROOT)/usr/lib/
+	ln -sf $(SYSROOT)/usr/lib/$(TARGET) $(SYSROOT)/usr/lib/$(NAME)
+
