@@ -5,11 +5,13 @@ endif
 
 CC           ?= gcc
 STRIP        ?= strip
-NAME         := libshake.so
+LIBNAME      := libshake.so
 SOVERSION    := 0
-SONAME       := $(NAME).$(SOVERSION)
+SONAME       := $(LIBNAME).$(SOVERSION)
 TARGET       ?= $(SONAME)
 SYSROOT      := $(shell $(CC) --print-sysroot)
+DESTDIR      ?= $(SYSROOT)
+PREFIX       ?= /usr
 CFLAGS       := -fPIC
 SRCDIR       := src
 OBJDIR       := obj
@@ -38,11 +40,14 @@ $(OBJ): $(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
 $(OBJDIR):
 	mkdir -p $@
 
+install-headers:
+	cp include/*.h $(DESTDIR)$(PREFIX)/include/
+
+install-lib:
+	cp $(TARGET) $(DESTDIR)$(PREFIX)/lib/
+	ln -sf $(DESTDIR)$(PREFIX)/lib/$(TARGET) $(DESTDIR)$(PREFIX)/lib/$(LIBNAME)
+
+install: $(TARGET) install-headers install-lib
+
 clean:
 	rm -Rf $(TARGET) $(OBJDIR)
-
-install: $(TARGET)
-	cp include/*.h $(SYSROOT)/usr/include/
-	cp $(TARGET) $(SYSROOT)/usr/lib/
-	ln -sf $(SYSROOT)/usr/lib/$(TARGET) $(SYSROOT)/usr/lib/$(NAME)
-
