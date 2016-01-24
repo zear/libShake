@@ -1,8 +1,11 @@
 #ifndef _SHAKE_PRIVATE_H_
 #define _SHAKE_PRIVATE_H_
 
+#if defined(PLATFORM_LINUX)
+
 #include <dirent.h>
 #include <linux/input.h>
+#include "helpers.h"
 
 #define SHAKE_DIR_NODES		"/dev/input"
 
@@ -14,31 +17,23 @@
 #define BITS_TO_LONGS(x) \
 	(((x) + 8 * sizeof (unsigned long) - 1) / (8 * sizeof (unsigned long)))
 
-
 typedef struct Shake_Device
 {
-	int fd;
-	char *node;
 	char name[128];
 	int id;
-	unsigned long features[BITS_TO_LONGS(FF_CNT)];
 	int capacity; /* Number of effects the device can play at the same time */
-} Shake_Device;
+	/* Platform dependent section */
+	int fd;
+	char *node;
+	unsigned long features[BITS_TO_LONGS(FF_CNT)];
 
-typedef struct listElement
-{
-	struct listElement *next;
-	Shake_Device *dev;
-} listElement;
+} Shake_Device;
 
 extern listElement *listHead;
 extern unsigned int numOfDevices;
 
-/* Helper functions */
 int nameFilter(const struct dirent *entry);
-listElement *listElementPrepend(listElement *head);
-listElement *listElementDelete(listElement *head, listElement *toDelNode);
-listElement *listElementDeleteAll(listElement *head);
-listElement *listElementGet(listElement *head, unsigned int id);
+
+#endif /* PLATFORM_LINUX */
 
 #endif /* _SHAKE_PRIVATE_H_ */

@@ -1,6 +1,11 @@
 ifeq ($(PLATFORM), gcw0)
   CC         := /opt/gcw0-toolchain/usr/bin/mipsel-linux-gcc
   STRIP      := /opt/gcw0-toolchain/usr/bin/mipsel-linux-strip
+  BACKEND    := LINUX
+endif
+
+ifndef BACKEND
+$(error Please specify BACKEND. Possible values: LINUX")
 endif
 
 CC           ?= gcc
@@ -23,6 +28,8 @@ ifdef DEBUG
 else
   CFLAGS += -O2
 endif
+
+CFLAGS += -DPLATFORM_$(BACKEND)
 
 .PHONY: all clean
 
