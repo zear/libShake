@@ -20,8 +20,7 @@ else ifeq ($(BACKEND), OSX)
 LIBEXT       := .dylib
 SONAME       := $(LIBNAME).$(SOVERSION)$(LIBEXT)
 PREFIX       ?= /usr/local
-LDFLAGS      := -Wl,-framework,Cocoa -framework IOKit -framework CoreFoundation -framework ForceFeedback
-CFLAGS       := -install_name $(SONAME)
+LDFLAGS      := -Wl,-framework,Cocoa -framework IOKit -framework CoreFoundation -framework ForceFeedback -install_name $(SONAME)
 endif
 
 CC           ?= gcc
