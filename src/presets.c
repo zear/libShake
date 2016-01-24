@@ -1,5 +1,4 @@
 #include "shake.h"
-#include "shake_private_linux.h"
 #include "helpers.h"
 #include <limits.h>
 

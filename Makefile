@@ -5,18 +5,30 @@ ifeq ($(PLATFORM), gcw0)
 endif
 
 ifndef BACKEND
-$(error Please specify BACKEND. Possible values: LINUX")
+$(error Please specify BACKEND. Possible values: LINUX, OSX")
+endif
+
+LIBNAME      := libshake
+SOVERSION    := 0
+
+ifeq ($(BACKEND), LINUX)
+LIBEXT       := .so
+SONAME       := $(LIBNAME).$(SOVERSION)$(LIBEXT)
+PREFIX       ?= /usr
+LDFLAGS      :=-Wl,-soname,$(SONAME)
+else ifeq ($(BACKEND), OSX)
+LIBEXT       := .dylib
+SONAME       := $(LIBNAME).$(SOVERSION)$(LIBEXT)
+PREFIX       ?= /usr/local
+LDFLAGS      := -Wl,-framework,Cocoa -framework IOKit -framework CoreFoundation -framework ForceFeedback
+CFLAGS       := -install_name $(SONAME)
 endif
 
 CC           ?= gcc
 STRIP        ?= strip
-LIBNAME      := libshake.so
-SOVERSION    := 0
-SONAME       := $(LIBNAME).$(SOVERSION)
 TARGET       ?= $(SONAME)
 SYSROOT      := $(shell $(CC) --print-sysroot)
 DESTDIR      ?= $(SYSROOT)
-PREFIX       ?= /usr
 CFLAGS       := -fPIC
 SRCDIR       := src
 OBJDIR       := obj
@@ -36,7 +48,7 @@ CFLAGS += -DPLATFORM_$(BACKEND)
 all: $(TARGET)
 
 $(TARGET): $(OBJ)
-	$(CC) -Wl,-soname,$(SONAME) -shared $(CFLAGS) $^ -o $@
+	$(CC) $(LDFLAGS) -shared $(CFLAGS) $^ -o $@
 ifdef DO_STRIP
 	$(STRIP) $@
 endif
@@ -52,7 +64,7 @@ install-headers:
 
 install-lib:
 	cp $(TARGET) $(DESTDIR)$(PREFIX)/lib/
-	ln -sf $(DESTDIR)$(PREFIX)/lib/$(TARGET) $(DESTDIR)$(PREFIX)/lib/$(LIBNAME)
+	ln -sf $(DESTDIR)$(PREFIX)/lib/$(TARGET) $(DESTDIR)$(PREFIX)/lib/$(LIBNAME)$(LIBEXT)
 
 install: $(TARGET) install-headers install-lib
 
