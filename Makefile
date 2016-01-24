@@ -13,7 +13,7 @@ SOVERSION    := 0
 
 ifeq ($(BACKEND), LINUX)
 LIBEXT       := .so
-SONAME       := $(LIBNAME).$(SOVERSION)$(LIBEXT)
+SONAME       := $(LIBNAME)$(LIBEXT).$(SOVERSION)
 PREFIX       ?= /usr
 LDFLAGS      :=-Wl,-soname,$(SONAME)
 else ifeq ($(BACKEND), OSX)
