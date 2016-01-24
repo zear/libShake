@@ -8,15 +8,6 @@
 #include <IOKit/hid/IOHIDLib.h>
 #include <IOKit/hid/IOHIDKeys.h>
 
-#include <unistd.h>
-#include <dirent.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <stdio.h>
-
 #include "shake.h"
 #include "shake_private_osx.h"
 #include "helpers.h"
