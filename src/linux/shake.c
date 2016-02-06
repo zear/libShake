@@ -1,7 +1,5 @@
 /* libShake - a basic haptic library */
 
-#if defined(PLATFORM_LINUX)
-
 #include <unistd.h>
 #include <dirent.h>
 #include <fcntl.h>
@@ -13,8 +11,8 @@
 #include <stdio.h>
 
 #include "shake.h"
-#include "shake_private_linux.h"
-#include "helpers.h"
+#include "shake_private.h"
+#include "../common/helpers.h"
 
 listElement *listHead;
 unsigned int numOfDevices;
@@ -421,5 +419,3 @@ void Shake_Close(Shake_Device *dev)
 
 	close(dev->fd);
 }
-
-#endif /* PLATFORM_LINUX */

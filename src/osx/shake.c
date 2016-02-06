@@ -1,7 +1,5 @@
 /* libShake - a basic haptic library */
 
-#if defined(PLATFORM_OSX)
-
 #include <ForceFeedback/ForceFeedback.h>
 #include <ForceFeedback/ForceFeedbackConstants.h>
 #include <IOKit/IOKitLib.h>
@@ -9,8 +7,8 @@
 #include <IOKit/hid/IOHIDKeys.h>
 
 #include "shake.h"
-#include "shake_private_osx.h"
-#include "helpers.h"
+#include "./shake_private.h"
+#include "../common/helpers.h"
 
 listElement *listHead;
 unsigned int numOfDevices;
@@ -696,5 +694,3 @@ void Shake_Close(Shake_Device *dev)
 		dev->device = 0;
 	}
 }
-
-#endif /* PLATFORM_OSX */

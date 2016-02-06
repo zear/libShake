@@ -1,7 +1,7 @@
 ifeq ($(PLATFORM), gcw0)
-  CC         := /opt/gcw0-toolchain/usr/bin/mipsel-linux-gcc
-  STRIP      := /opt/gcw0-toolchain/usr/bin/mipsel-linux-strip
-  BACKEND    := LINUX
+  CC := /opt/gcw0-toolchain/usr/bin/mipsel-linux-gcc
+  STRIP := /opt/gcw0-toolchain/usr/bin/mipsel-linux-strip
+  BACKEND := LINUX
 endif
 
 ifndef BACKEND
@@ -11,28 +11,29 @@ endif
 LIBNAME      := libshake
 SOVERSION    := 0
 
+SRC := $(wildcard src/common/*.c)
+
 ifeq ($(BACKEND), LINUX)
-LIBEXT       := .so
-SONAME       := $(LIBNAME)$(LIBEXT).$(SOVERSION)
-PREFIX       ?= /usr
-LDFLAGS      :=-Wl,-soname,$(SONAME)
+  LIBEXT := .so
+  SONAME := $(LIBNAME)$(LIBEXT).$(SOVERSION)
+  PREFIX ?= /usr
+  LDFLAGS :=-Wl,-soname,$(SONAME)
+  SRC += $(wildcard src/linux/*.c)
 else ifeq ($(BACKEND), OSX)
-LIBEXT       := .dylib
-SONAME       := $(LIBNAME).$(SOVERSION)$(LIBEXT)
-PREFIX       ?= /usr/local
-LDFLAGS      := -Wl,-framework,Cocoa -framework IOKit -framework CoreFoundation -framework ForceFeedback -install_name $(SONAME)
+  LIBEXT := .dylib
+  SONAME := $(LIBNAME).$(SOVERSION)$(LIBEXT)
+  PREFIX ?= /usr/local
+  LDFLAGS := -Wl,-framework,Cocoa -framework IOKit -framework CoreFoundation -framework ForceFeedback -install_name $(SONAME)
+  SRC += $(wildcard src/osx/*.c)
 endif
 
-CC           ?= gcc
-STRIP        ?= strip
-TARGET       ?= $(SONAME)
-SYSROOT      := $(shell $(CC) --print-sysroot)
-DESTDIR      ?= $(SYSROOT)
-CFLAGS       := -fPIC
-SRCDIR       := src
-OBJDIR       := obj
-SRC          := $(wildcard $(SRCDIR)/*.c)
-OBJ          := $(SRC:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
+CC ?= gcc
+STRIP ?= strip
+TARGET ?= $(SONAME)
+SYSROOT := $(shell $(CC) --print-sysroot)
+DESTDIR ?= $(SYSROOT)
+CFLAGS := -fPIC
+OBJ := $(SRC:.c=.o)
 
 ifdef DEBUG
   CFLAGS += -ggdb -Wall -Werror
@@ -40,11 +41,9 @@ else
   CFLAGS += -O2
 endif
 
-CFLAGS += -DPLATFORM_$(BACKEND)
-
 .PHONY: all clean
 
-all: $(TARGET)
+all:	$(TARGET)
 
 $(TARGET): $(OBJ)
 	$(CC) $(LDFLAGS) -shared $(CFLAGS) $^ -o $@
@@ -52,11 +51,8 @@ ifdef DO_STRIP
 	$(STRIP) $@
 endif
 
-$(OBJ): $(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
+%.o:	%.c
 	$(CC) -c $(CFLAGS) $< -o $@ -I include
-
-$(OBJDIR):
-	mkdir -p $@
 
 install-headers:
 	cp include/*.h $(DESTDIR)$(PREFIX)/include/
@@ -68,4 +64,4 @@ install-lib:
 install: $(TARGET) install-headers install-lib
 
 clean:
-	rm -Rf $(TARGET) $(OBJDIR)
+	rm -Rf $(TARGET) $(OBJ)
