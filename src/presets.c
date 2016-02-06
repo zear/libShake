@@ -1,5 +1,5 @@
 #include "shake.h"
-#include "shake_private.h"
+#include "helpers.h"
 #include <limits.h>
 
 void Shake_SimplePeriodic(Shake_Effect *effect, Shake_PeriodicWaveform waveform, float forcePercent, float attackSecs, float sustainSecs, float fadeSecs)
