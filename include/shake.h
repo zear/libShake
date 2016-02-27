@@ -21,6 +21,19 @@ typedef enum Shake_Bool
 	SHAKE_TRUE	= 1
 } Shake_Bool;
 
+typedef enum Shake_ErrorCode {
+    SHAKE_EC_ACCESS,
+    SHAKE_EC_DEVICE,
+    SHAKE_EC_EFFECT,
+    SHAKE_EC_EFFECT_ID,
+    SHAKE_EC_COMM,
+    SHAKE_EC_SUPPORT,
+    SHAKE_EC_UPLOAD,
+    SHAKE_EC_ERASE,
+    SHAKE_EC_QUERY_FEATURES,
+    SHAKE_EC_QUERY_CAPACITY,
+} Shake_ErrorCode;
+
 struct Shake_Device;
 typedef struct Shake_Device Shake_Device;
 
@@ -125,6 +138,8 @@ Shake_Status Shake_Stop(Shake_Device *dev, int id);
 
 void Shake_SimplePeriodic(Shake_Effect *effect, Shake_PeriodicWaveform waveform, float forcePercent, float attackSecs, float sustainSecs, float fadeSecs);
 void Shake_SimpleRumble(Shake_Effect *effect, float strongPercent, float weakPercent, float secs);
+
+Shake_ErrorCode Shake_GetErrorCode();
 
 #ifdef __cplusplus
 }
