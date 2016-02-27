@@ -421,7 +421,7 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	{
 		FFPERIODIC pf;
 
-		switch (effect->periodic.waveform)
+		switch (effect->u.periodic.waveform)
 		{
 			case SHAKE_PERIODIC_SQUARE:
 				effectType = kFFEffectType_Square_ID;
@@ -447,17 +447,17 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 			return -2;
 		}
 
-		pf.dwMagnitude = convertMagnitude(effect->periodic.magnitude);
-		pf.lOffset = effect->periodic.offset;
-		pf.dwPhase = effect->periodic.phase;
-		pf.dwPeriod = effect->periodic.period * 1000;
+		pf.dwMagnitude = convertMagnitude(effect->u.periodic.magnitude);
+		pf.lOffset = effect->u.periodic.offset;
+		pf.dwPhase = effect->u.periodic.phase;
+		pf.dwPeriod = effect->u.periodic.period * 1000;
 
 		e.lpEnvelope = malloc(sizeof(FFENVELOPE));
 		e.lpEnvelope->dwSize = sizeof(FFENVELOPE);
-		e.lpEnvelope->dwAttackTime = effect->periodic.envelope.attackLength * 1000;
-		e.lpEnvelope->dwAttackLevel = effect->periodic.envelope.attackLevel;
-		e.lpEnvelope->dwFadeTime = effect->periodic.envelope.fadeLength * 1000;
-		e.lpEnvelope->dwFadeLevel = effect->periodic.envelope.fadeLevel;
+		e.lpEnvelope->dwAttackTime = effect->u.periodic.envelope.attackLength * 1000;
+		e.lpEnvelope->dwAttackLevel = effect->u.periodic.envelope.attackLevel;
+		e.lpEnvelope->dwFadeTime = effect->u.periodic.envelope.fadeLength * 1000;
+		e.lpEnvelope->dwFadeLevel = effect->u.periodic.envelope.fadeLevel;
 		e.dwTriggerButton = FFEB_NOTRIGGER;
 		e.dwTriggerRepeatInterval = 0;
 
@@ -469,15 +469,15 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	{
 		FFCONSTANTFORCE cf;
 
-		cf.lMagnitude = convertMagnitude(effect->constant.level);
+		cf.lMagnitude = convertMagnitude(effect->u.constant.level);
 
 		effectType = kFFEffectType_ConstantForce_ID;
 		e.lpEnvelope = malloc(sizeof(FFENVELOPE));
 		e.lpEnvelope->dwSize = sizeof(FFENVELOPE);
-		e.lpEnvelope->dwAttackTime = effect->constant.envelope.attackLength * 1000;
-		e.lpEnvelope->dwAttackLevel = effect->constant.envelope.attackLevel;
-		e.lpEnvelope->dwFadeTime = effect->constant.envelope.fadeLength * 1000;
-		e.lpEnvelope->dwFadeLevel = effect->constant.envelope.fadeLevel;
+		e.lpEnvelope->dwAttackTime = effect->u.constant.envelope.attackLength * 1000;
+		e.lpEnvelope->dwAttackLevel = effect->u.constant.envelope.attackLevel;
+		e.lpEnvelope->dwFadeTime = effect->u.constant.envelope.fadeLength * 1000;
+		e.lpEnvelope->dwFadeLevel = effect->u.constant.envelope.fadeLevel;
 		e.dwTriggerButton = FFEB_NOTRIGGER;
 		e.dwTriggerRepeatInterval = 0;
 
@@ -489,16 +489,16 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	{
 		FFRAMPFORCE rf;
 
-		rf.lStart = ((float)effect->ramp.startLevel/0xffff) * FF_FFNOMINALMAX;
-		rf.lEnd = ((float)effect->ramp.endLevel/0xffff) * FF_FFNOMINALMAX;
+		rf.lStart = ((float)effect->u.ramp.startLevel/0xffff) * FF_FFNOMINALMAX;
+		rf.lEnd = ((float)effect->u.ramp.endLevel/0xffff) * FF_FFNOMINALMAX;
 
 		effectType = kFFEffectType_RampForce_ID;
 		e.lpEnvelope = malloc(sizeof(FFENVELOPE));
 		e.lpEnvelope->dwSize = sizeof(FFENVELOPE);
-		e.lpEnvelope->dwAttackTime = effect->ramp.envelope.attackLength * 1000;
-		e.lpEnvelope->dwAttackLevel = effect->ramp.envelope.attackLevel;
-		e.lpEnvelope->dwFadeTime = effect->ramp.envelope.fadeLength * 1000;
-		e.lpEnvelope->dwFadeLevel = effect->ramp.envelope.fadeLevel;
+		e.lpEnvelope->dwAttackTime = effect->u.ramp.envelope.attackLength * 1000;
+		e.lpEnvelope->dwAttackLevel = effect->u.ramp.envelope.attackLevel;
+		e.lpEnvelope->dwFadeTime = effect->u.ramp.envelope.fadeLength * 1000;
+		e.lpEnvelope->dwFadeLevel = effect->u.ramp.envelope.fadeLevel;
 		e.dwTriggerButton = FFEB_NOTRIGGER;
 		e.dwTriggerRepeatInterval = 0;
 
