@@ -14,6 +14,8 @@
 #include "shake_private.h"
 #include "../common/helpers.h"
 
+#define SHAKE_TEST(x) ((x) ? SHAKE_TRUE : SHAKE_FALSE)
+
 listElement *listHead;
 unsigned int numOfDevices;
 
@@ -30,7 +32,7 @@ int nameFilter(const struct dirent *entry)
 
 /* Public functions */
 
-int Shake_Init()
+Shake_Status Shake_Init()
 {
 	struct dirent **nameList;
 	int numOfEntries;
@@ -42,6 +44,7 @@ int Shake_Init()
 	if (numOfEntries < 0)
 	{
 		perror("Shake_Init: Failed to retrieve device nodes.");
+		return SHAKE_ERROR;
 	}
 	else
 	{
@@ -53,13 +56,13 @@ int Shake_Init()
 
 			dev.node = malloc(strlen(SHAKE_DIR_NODES) + strlen("/") + strlen(nameList[i]->d_name) + 1);
 			if (dev.node == NULL)
-				return -1;
+				return SHAKE_ERROR;
 
 			strcpy(dev.node, SHAKE_DIR_NODES);
 			strcat(dev.node, "/");
 			strcat(dev.node, nameList[i]->d_name);
 
-			if (Shake_Probe(&dev))
+			if (Shake_Probe(&dev) == SHAKE_OK)
 			{
 				dev.id = numOfDevices;
 				listHead = listElementPrepend(listHead);
@@ -74,7 +77,7 @@ int Shake_Init()
 		free(nameList);
 	}
 
-	return 0;
+	return SHAKE_OK;
 }
 
 void Shake_Quit()
@@ -104,22 +107,22 @@ int Shake_NumOfDevices()
 	return numOfDevices;
 }
 
-int Shake_Probe(Shake_Device *dev)
+Shake_Status Shake_Probe(Shake_Device *dev)
 {
 	int isHaptic;
 
 	if(!dev || !dev->node)
-		return -1;
+		return SHAKE_ERROR;
 
 	dev->fd = open(dev->node, O_RDWR);
 
 	if (!dev->fd)
-		return -1;
+		return SHAKE_ERROR;
 
 	isHaptic = !Shake_Query(dev);
 	dev->fd = close(dev->fd);
 	
-	return isHaptic;
+	return isHaptic ? SHAKE_OK : SHAKE_ERROR;
 }
 
 Shake_Device *Shake_Open(unsigned int id)
@@ -140,18 +143,18 @@ Shake_Device *Shake_Open(unsigned int id)
 	return dev->fd ? dev : NULL;
 }
 
-int Shake_Query(Shake_Device *dev)
+Shake_Status Shake_Query(Shake_Device *dev)
 {
 	int size = sizeof(dev->features)/sizeof(unsigned long);
 	int i;
 
 	if(!dev)
-		return -1;
+		return SHAKE_ERROR;
 
 	if (ioctl(dev->fd, EVIOCGBIT(EV_FF, sizeof(dev->features)), dev->features) == -1)
 	{
 		perror("Shake_Query: Failed to query for device features.");
-		return -1;
+		return SHAKE_ERROR;
 	}
 
 	for (i = 0; i < size; ++i)
@@ -161,28 +164,28 @@ int Shake_Query(Shake_Device *dev)
 	}
 
 	if (i >= size) /* Device doesn't support any force feedback effects. Ignore it. */
-		return -1;
+		return SHAKE_ERROR;
 
 	if (ioctl(dev->fd, EVIOCGEFFECTS, &dev->capacity) == -1)
 	{
 		perror("Shake_Query: Failed to query for device effect capacity.");
-		return -1;
+		return SHAKE_ERROR;
 	}
 
 	if (dev->capacity <= 0) /* Device doesn't support uploading effects. Ignore it. */
-		return -1;
+		return SHAKE_ERROR;
 
 	if (ioctl(dev->fd, EVIOCGNAME(sizeof(dev->name)), dev->name) == -1) /* Get device name */
 	{
 		strncpy(dev->name, "Unknown", sizeof(dev->name));
 	}
 
-	return 0;
+	return SHAKE_OK;
 }
 
 int Shake_DeviceId(Shake_Device *dev)
 {
-	return dev ? dev->id : -1;
+	return dev ? dev->id : SHAKE_ERROR;
 }
 
 const char *Shake_DeviceName(Shake_Device *dev)
@@ -192,31 +195,31 @@ const char *Shake_DeviceName(Shake_Device *dev)
 
 int Shake_DeviceEffectCapacity(Shake_Device *dev)
 {
-	return dev ? dev->capacity : -1;
+	return dev ? dev->capacity : SHAKE_ERROR;
 }
 
-int Shake_QueryEffectSupport(Shake_Device *dev, Shake_EffectType type)
+Shake_Bool Shake_QueryEffectSupport(Shake_Device *dev, Shake_EffectType type)
 {
 	/* Starts at a magic, non-zero number, FF_RUMBLE.
 	   Increments respectively to EffectType. */
-	return test_bit(FF_RUMBLE + type, dev->features) ? 1 : 0;
+	return SHAKE_TEST(test_bit(FF_RUMBLE + type, dev->features));
 }
 
-int Shake_QueryWaveformSupport(Shake_Device *dev, Shake_PeriodicWaveform waveform)
+Shake_Bool Shake_QueryWaveformSupport(Shake_Device *dev, Shake_PeriodicWaveform waveform)
 {
 	/* Starts at a magic, non-zero number, FF_SQUARE.
 	   Increments respectively to PeriodicWaveform. */
-	return test_bit(FF_SQUARE + waveform, dev->features) ? 1 : 0;
+	return SHAKE_TEST(test_bit(FF_SQUARE + waveform, dev->features));
 }
 
-int Shake_QueryGainSupport(Shake_Device *dev)
+Shake_Bool Shake_QueryGainSupport(Shake_Device *dev)
 {
-	return test_bit(FF_GAIN, dev->features) ? 1 : 0;
+	return SHAKE_TEST(test_bit(FF_GAIN, dev->features));
 }
 
-int Shake_QueryAutocenterSupport(Shake_Device *dev)
+Shake_Bool Shake_QueryAutocenterSupport(Shake_Device *dev)
 {
-	return test_bit(FF_AUTOCENTER, dev->features) ? 1 : 0;
+	return SHAKE_TEST(test_bit(FF_AUTOCENTER, dev->features));
 }
 
 void Shake_SetGain(Shake_Device *dev, int gain)
@@ -279,11 +282,11 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	struct ff_effect e;
 
 	if (!dev)
-		return -1;
+    return SHAKE_ERROR;
 	if (!effect)
-		return -1;
+		return SHAKE_ERROR;
 	if (effect->id < -1)
-		return -1;
+		return SHAKE_ERROR;
 
 	if(effect->type == SHAKE_EFFECT_RUMBLE)
 	{
@@ -345,13 +348,13 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	else
 	{
 		perror("Shake_UploadEffect: Unsupported effect.");
-		return -2;
+		return SHAKE_ERROR;
 	}
 
 	if (ioctl(dev->fd, EVIOCSFF, &e) == -1)
 	{
 		perror("Shake_UploadEffect: Failed to upload effect.");
-		return -3;
+		return SHAKE_ERROR;
 	}
 
 	return e.id;
