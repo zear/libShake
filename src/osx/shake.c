@@ -15,8 +15,8 @@ unsigned int numOfDevices;
 
 /* Prototypes */
 
-int Shake_Probe(Shake_Device *dev);
-int Shake_Query(Shake_Device *dev);
+Shake_Status Shake_Probe(Shake_Device *dev);
+Shake_Status Shake_Query(Shake_Device *dev);
 int convertMagnitude(int magnitude);
 
 int convertMagnitude(int magnitude)
@@ -26,7 +26,7 @@ int convertMagnitude(int magnitude)
 
 /* Public functions */
 
-int Shake_Init()
+Shake_Status Shake_Init()
 {
 	IOReturn ret;
 	io_iterator_t iter;
@@ -37,19 +37,19 @@ int Shake_Init()
 
 	if (!match)
 	{
-		return -1;
+		return SHAKE_ERROR;
 	}
 
 	ret = IOServiceGetMatchingServices(kIOMasterPortDefault, match, &iter);
 
 	if (ret != kIOReturnSuccess)
 	{
-		return -1;
+		return SHAKE_ERROR;
 	}
 
 	if (!IOIteratorIsValid(iter))
 	{
-		return -1;
+		return SHAKE_ERROR;
 	}
 
 	while ((device = IOIteratorNext(iter)) != IO_OBJECT_NULL)
@@ -58,7 +58,7 @@ int Shake_Init()
 		dev.service = device;
 		dev.effectList = NULL;
 
-		if (Shake_Probe(&dev) > 0)
+		if (Shake_Probe(&dev) == SHAKE_OK)
 		{
 			dev.id = numOfDevices;
 			listHead = listElementPrepend(listHead);
@@ -74,7 +74,7 @@ int Shake_Init()
 
 	IOObjectRelease(iter);
 
-	return 0;
+	return SHAKE_OK;
 }
 
 void Shake_Quit()
@@ -104,19 +104,19 @@ int Shake_NumOfDevices()
 	return numOfDevices;
 }
 
-int Shake_Probe(Shake_Device *dev)
+Shake_Status Shake_Probe(Shake_Device *dev)
 {
 	if ((FFIsForceFeedback(dev->service)) != FF_OK)
 	{
-		return -1;
+		return SHAKE_ERROR;
 	}
 
 	if (Shake_Query(dev))
 	{
-		return -1;
+		return SHAKE_ERROR;
 	}
 
-	return 1;
+	return SHAKE_OK;
 }
 
 Shake_Device *Shake_Open(unsigned int id)
@@ -143,43 +143,42 @@ Shake_Device *Shake_Open(unsigned int id)
 	return dev;
 }
 
-int Shake_Query(Shake_Device *dev)
+Shake_Status Shake_Query(Shake_Device *dev)
 {
 	HRESULT result;
 	io_name_t deviceName;
 
 	if(!dev)
-		return -1;
+		return SHAKE_ERROR;
 
 	if(!dev->service)
 	{
-		return -1;
+		return SHAKE_ERROR;
 	}
 
 	result = FFCreateDevice(dev->service, &dev->device);
-
 	if (result != FF_OK)
 	{
 		perror("Shake_Query: Failed to create device");
-		return -1;
+		return SHAKE_ERROR;
 	}
 
 	result = FFDeviceGetForceFeedbackCapabilities(dev->device, &dev->features);
 	if (result != FF_OK)
 	{
 		perror("Shake_Query: Failed to query for device features");
-		return -1;
+		return SHAKE_ERROR;
 	}
 
 	if (!dev->features.supportedEffects) /* Device doesn't support any force feedback effects. Ignore it. */
 	{
-		return -1;
+		return SHAKE_ERROR;
 	}
 
 	dev->capacity = dev->features.storageCapacity;
 
 	if (dev->capacity <= 0) /* Device doesn't support uploading effects. Ignore it. */
-		return -1;
+		return SHAKE_ERROR;
 
 	IORegistryEntryGetName(dev->service, deviceName); /* Get device name */
 	if (strlen((char *)deviceName))
@@ -196,12 +195,12 @@ int Shake_Query(Shake_Device *dev)
 		dev->device = 0;
 	}
 
-	return 0;
+	return SHAKE_OK;
 }
 
 int Shake_DeviceId(Shake_Device *dev)
 {
-	return dev ? dev->id : -1;
+	return dev ? dev->id : SHAKE_ERROR;
 }
 
 const char *Shake_DeviceName(Shake_Device *dev)
@@ -211,17 +210,17 @@ const char *Shake_DeviceName(Shake_Device *dev)
 
 int Shake_DeviceEffectCapacity(Shake_Device *dev)
 {
-	return dev ? dev->capacity : -1;
+	return dev ? dev->capacity : SHAKE_ERROR;
 }
 
-int Shake_QueryEffectSupport(Shake_Device *dev, Shake_EffectType type)
+Shake_Bool Shake_QueryEffectSupport(Shake_Device *dev, Shake_EffectType type)
 {
 	FFCapabilitiesEffectType query;
 
 	switch (type)
 	{
 		case SHAKE_EFFECT_RUMBLE:
-			return 0; // TODO
+			return SHAKE_FALSE; // TODO
 		break;
 		case SHAKE_EFFECT_PERIODIC:
 		{
@@ -230,10 +229,10 @@ int Shake_QueryEffectSupport(Shake_Device *dev, Shake_EffectType type)
 			for (waveform = SHAKE_PERIODIC_SQUARE; waveform < SHAKE_PERIODIC_COUNT; ++waveform)
 			{
 				if (Shake_QueryWaveformSupport(dev, waveform))
-					return 1;
+					return SHAKE_TRUE;
 			}
 
-			return 0;
+			return SHAKE_FALSE;
 		}
 		break;
 		case SHAKE_EFFECT_CONSTANT:
@@ -256,13 +255,13 @@ int Shake_QueryEffectSupport(Shake_Device *dev, Shake_EffectType type)
 		break;
 
 		default:
-		return 0;
+		return SHAKE_FALSE;
 	}
 
-	return test_bit(query, dev->features.supportedEffects) ? 1 : 0;
+	return test_bit(query, dev->features.supportedEffects) ? SHAKE_TRUE : SHAKE_FALSE;
 }
 
-int Shake_QueryWaveformSupport(Shake_Device *dev, Shake_PeriodicWaveform waveform)
+Shake_Bool Shake_QueryWaveformSupport(Shake_Device *dev, Shake_PeriodicWaveform waveform)
 {
 	FFCapabilitiesEffectType query;
 
@@ -288,13 +287,13 @@ int Shake_QueryWaveformSupport(Shake_Device *dev, Shake_PeriodicWaveform wavefor
 		break;
 
 		default:
-		return 0;
+		return SHAKE_FALSE;
 	}
 
-	return test_bit(query, dev->features.supportedEffects) ? 1 : 0;
+	return test_bit(query, dev->features.supportedEffects) ? SHAKE_TRUE : SHAKE_FALSE;
 }
 
-int Shake_QueryGainSupport(Shake_Device *dev)
+Shake_Bool Shake_QueryGainSupport(Shake_Device *dev)
 {
 	HRESULT result;
 	int value = 0; /* Unused for now. */
@@ -303,17 +302,17 @@ int Shake_QueryGainSupport(Shake_Device *dev)
 
 	if (result == FF_OK)
 	{
-		return 1;
+		return SHAKE_TRUE;
 	}
 	else if (result != FFERR_UNSUPPORTED)
 	{
 		perror("Shake_QueryGainSupport: Failed to query for gain support");
 	}
 
-	return 0;
+	return SHAKE_FALSE;
 }
 
-int Shake_QueryAutocenterSupport(Shake_Device *dev)
+Shake_Bool Shake_QueryAutocenterSupport(Shake_Device *dev)
 {
 	HRESULT result;
 	int value = 0; /* Unused for now. */
@@ -322,14 +321,14 @@ int Shake_QueryAutocenterSupport(Shake_Device *dev)
 
 	if (result == FF_OK)
 	{
-		return 1;
+		return SHAKE_TRUE;
 	}
 	else if (result != FFERR_UNSUPPORTED)
 	{
 		perror("Shake_QueryAutocenterSupport: Failed to query for autocenter support");
 	}
 
-	return 0;
+	return SHAKE_FALSE;
 }
 
 void Shake_SetGain(Shake_Device *dev, int gain)
@@ -387,11 +386,11 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	LONG rglDirection[2];
 
 	if (!dev)
-		return -1;
+		return SHAKE_ERROR;
 	if (!effect)
-		return -1;
+		return SHAKE_ERROR;
 	if (effect->id < -1)
-		return -1;
+		return SHAKE_ERROR;
 
 	rgdwAxes[0] = FFJOFS_X;
 	rgdwAxes[1] = FFJOFS_Y;
@@ -444,7 +443,7 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 
 			default:
 				perror("Shake_UploadEffect: Unsupported waveform");
-			return -2;
+			return SHAKE_ERROR;
 		}
 
 		pf.dwMagnitude = convertMagnitude(effect->u.periodic.magnitude);
@@ -509,7 +508,7 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	else
 	{
 		perror("Shake_UploadEffect: Unsupported effect");
-		return -2;
+		return SHAKE_ERROR;
 	}
 
 	dev->effectList = listElementPrepend(dev->effectList);
@@ -530,27 +529,27 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	if ((unsigned int)result == FFERR_EFFECTTYPEMISMATCH)
 	{
 		perror("Shake_UploadEffect: Effect type mismatch");
-		return -3;
+		return SHAKE_ERROR;
 	}
 	else if ((unsigned int)result == FFERR_EFFECTTYPENOTSUPPORTED)
 	{
 		perror("Shake_UploadEffect: Effect not supported");
-		return -3;
+		return SHAKE_ERROR;
 	}
 	else if ((unsigned int)result == FFERR_DEVICEFULL)
 	{
 		perror("Shake_UploadEffect: Device is full");
-		return -3;
+		return SHAKE_ERROR;
 	}
 	else if ((unsigned int)result == FFERR_INVALIDPARAM)
 	{
 		perror("Shake_UploadEffect: Invalid parameter");
-		return -3;
+		return SHAKE_ERROR;
 	}
 	else if ((unsigned int)result != FF_OK)
 	{
 		perror("Shake_UploadEffect: Failed to create device");
-		return -3;
+		return SHAKE_ERROR;
 	}
 
 	return ((effectContainer *)dev->effectList->item)->id;
