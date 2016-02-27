@@ -19,7 +19,7 @@ typedef struct effectContainer
 	FFEffectObjectReference effect;
 } effectContainer;
 
-typedef struct Shake_Device
+struct Shake_Device
 {
 	char name[128];
 	int id;
@@ -29,7 +29,7 @@ typedef struct Shake_Device
 	FFDeviceObjectReference device;
 	listElement *effectList;
 	FFCAPABILITIES features;
-} Shake_Device;
+};
 
 extern listElement *listHead;
 extern unsigned int numOfDevices;
