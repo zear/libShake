@@ -15,7 +15,7 @@
 #define BITS_TO_LONGS(x) \
 	(((x) + 8 * sizeof (unsigned long) - 1) / (8 * sizeof (unsigned long)))
 
-typedef struct Shake_Device
+struct Shake_Device
 {
 	char name[128];
 	int id;
@@ -25,7 +25,7 @@ typedef struct Shake_Device
 	char *node;
 	unsigned long features[BITS_TO_LONGS(FF_CNT)];
 
-} Shake_Device;
+};
 
 extern listElement *listHead;
 extern unsigned int numOfDevices;

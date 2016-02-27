@@ -1,5 +1,7 @@
 /* libShake - a basic haptic library */
 
+#define _GNU_SOURCE
+
 #include <unistd.h>
 #include <dirent.h>
 #include <fcntl.h>
