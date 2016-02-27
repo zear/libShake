@@ -56,7 +56,9 @@ Shake_Status Shake_Init()
 
 			dev.node = malloc(strlen(SHAKE_DIR_NODES) + strlen("/") + strlen(nameList[i]->d_name) + 1);
 			if (dev.node == NULL)
+			{
 				return SHAKE_ERROR;
+			}
 
 			strcpy(dev.node, SHAKE_DIR_NODES);
 			strcat(dev.node, "/");
@@ -226,7 +228,8 @@ Shake_Status Shake_SetGain(Shake_Device *dev, int gain)
 {
 	struct input_event ie;
 
-	if (!dev) {
+	if (!dev)
+	{
 		return SHAKE_ERROR;
 	}
 
@@ -252,7 +255,8 @@ Shake_Status Shake_SetAutocenter(Shake_Device *dev, int autocenter)
 {
 	struct input_event ie;
 
-	if (!dev) {
+	if (!dev)
+	{
 		return SHAKE_ERROR;
 	}
 
@@ -276,15 +280,17 @@ Shake_Status Shake_SetAutocenter(Shake_Device *dev, int autocenter)
 
 Shake_Status Shake_InitEffect(Shake_Effect *effect, Shake_EffectType type)
 {
-	if (!effect) {
+	if (!effect)
+	{
 		return SHAKE_ERROR;
 	}
 
 	memset(effect, 0, sizeof(*effect));
-	if (type < 0 || type >= SHAKE_EFFECT_COUNT) {
+	if (type < 0 || type >= SHAKE_EFFECT_COUNT)
+	{
 		perror("Shake_InitEffect: Unsupported effect.");
 		return SHAKE_ERROR;
-  }
+	}
 	effect->type = type;
 	effect->id = -1;
 
@@ -295,10 +301,12 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 {
 	struct ff_effect e;
 
-	if (!dev) {
-    return SHAKE_ERROR;
+	if (!dev)
+	{
+		return SHAKE_ERROR;
 	}
-	if (!effect) {
+	if (!effect)
+	{
 		return SHAKE_ERROR;
 	}
 	if (effect->id < -1) {
@@ -379,11 +387,13 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 
 Shake_Status Shake_EraseEffect(Shake_Device *dev, int id)
 {
-	if (!dev) {
+	if (!dev)
+	{
 		return SHAKE_ERROR;
 	}
 
-	if (id < 0) {
+	if (id < 0)
+	{
 		return SHAKE_ERROR;
 	}
 
@@ -398,10 +408,12 @@ Shake_Status Shake_EraseEffect(Shake_Device *dev, int id)
 
 Shake_Status Shake_Play(Shake_Device *dev, int id)
 {
-	if(!dev) {
+	if(!dev)
+	{
 		return SHAKE_ERROR;
 	}
-	if(id < 0) {
+	if(id < 0)
+	{
 		return SHAKE_ERROR;
 	}
 
@@ -421,10 +433,12 @@ Shake_Status Shake_Play(Shake_Device *dev, int id)
 
 Shake_Status Shake_Stop(Shake_Device *dev, int id)
 {
-	if(!dev) {
+	if(!dev)
+	{
 		return SHAKE_ERROR;
 	}
-	if(id < 0) {
+	if(id < 0)
+	{
 		return SHAKE_ERROR;
 	}
 
@@ -444,7 +458,8 @@ Shake_Status Shake_Stop(Shake_Device *dev, int id)
 
 Shake_Status Shake_Close(Shake_Device *dev)
 {
-	if (!dev) {
+	if (!dev)
+	{
 		return SHAKE_ERROR;
 	}
 
