@@ -14,13 +14,13 @@ int main()
 		device = Shake_Open(0);
 
 		Shake_InitEffect(&effect, SHAKE_EFFECT_PERIODIC);
-		effect.periodic.waveform		= SHAKE_PERIODIC_SINE;
-		effect.periodic.period			= 0.1*0x100;
-		effect.periodic.magnitude		= 0x6000;
-		effect.periodic.envelope.attackLength	= 0x100;
-		effect.periodic.envelope.attackLevel	= 0;
-		effect.periodic.envelope.fadeLength	= 0x100;
-		effect.periodic.envelope.fadeLevel	= 0;
+		effect.u.periodic.waveform		= SHAKE_PERIODIC_SINE;
+		effect.u.periodic.period			= 0.1*0x100;
+		effect.u.periodic.magnitude		= 0x6000;
+		effect.u.periodic.envelope.attackLength	= 0x100;
+		effect.u.periodic.envelope.attackLevel	= 0;
+		effect.u.periodic.envelope.fadeLength	= 0x100;
+		effect.u.periodic.envelope.fadeLevel	= 0;
 		effect.direction			= 0x4000;
 		effect.length				= 2000;
 		effect.delay				= 0;
