@@ -9,8 +9,17 @@ extern "C" {
 #define SHAKE_MINOR_VERSION 2
 #define SHAKE_PATCH_VERSION 0
 
-#define SHAKE_ERROR	(-1)
-#define SHAKE_OK	0
+typedef enum Shake_Status
+{
+	SHAKE_ERROR	= -1,
+	SHAKE_OK	= 0,
+} Shake_Status;
+
+typedef enum Shake_Bool
+{
+	SHAKE_FALSE	= 0,
+	SHAKE_TRUE	= 1
+} Shake_Bool;
 
 struct Shake_Device;
 typedef struct Shake_Device Shake_Device;
@@ -94,7 +103,7 @@ typedef struct Shake_Effect
 } Shake_Effect;
 
 /* libShake functions */
-int Shake_Init();
+Shake_Status Shake_Init();
 void Shake_Quit();
 int Shake_NumOfDevices();
 Shake_Device *Shake_Open(unsigned int id);
@@ -102,10 +111,10 @@ void Shake_Close(Shake_Device *dev);
 int Shake_DeviceId(Shake_Device *dev);
 const char *Shake_DeviceName(Shake_Device *dev);
 int Shake_DeviceEffectCapacity(Shake_Device *dev);
-int Shake_QueryEffectSupport(Shake_Device *dev, Shake_EffectType type);
-int Shake_QueryWaveformSupport(Shake_Device *dev, Shake_PeriodicWaveform waveform);
-int Shake_QueryGainSupport(Shake_Device *dev);
-int Shake_QueryAutocenterSupport(Shake_Device *dev);
+Shake_Bool Shake_QueryEffectSupport(Shake_Device *dev, Shake_EffectType type);
+Shake_Bool Shake_QueryWaveformSupport(Shake_Device *dev, Shake_PeriodicWaveform waveform);
+Shake_Bool Shake_QueryGainSupport(Shake_Device *dev);
+Shake_Bool Shake_QueryAutocenterSupport(Shake_Device *dev);
 void Shake_SetGain(Shake_Device *dev, int gain);
 void Shake_SetAutocenter(Shake_Device *dev, int autocenter);
 void Shake_InitEffect(Shake_Effect *effect, Shake_EffectType type);
