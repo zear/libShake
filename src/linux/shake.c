@@ -12,6 +12,7 @@
 
 #include "shake.h"
 #include "shake_private.h"
+#include "../common/helpers.h"
 
 listElement *listHead;
 unsigned int numOfDevices;
@@ -21,94 +22,18 @@ unsigned int numOfDevices;
 int Shake_Probe(Shake_Device *dev);
 int Shake_Query(Shake_Device *dev);
 
-/* Helper functions */
-
 int nameFilter(const struct dirent *entry)
 {
 	const char filter[] = "event";
 	return !strncmp(filter, entry->d_name, strlen(filter));
 }
 
-listElement *listElementPrepend(listElement *head)
-{
-	listElement *newNode = malloc(sizeof(listElement));
-	if(!newNode)
-	{
-		return head;
-	}
-
-	newNode->next = head;
-	return newNode;
-
-}
-
-listElement *listElementDelete(listElement *head, listElement *toDelNode)
-{
-	listElement *prevNode = NULL;
-	listElement *curNode = head;
-
-	while(curNode)
-	{
-		if(curNode == toDelNode)
-		{
-			if(!prevNode)
-			{
-				head = curNode->next;
-			}
-			else
-			{
-				prevNode->next = curNode->next;
-			}
-
-			free(curNode);
-			return head;
-		}
-		prevNode = curNode;
-		curNode = curNode->next;
-	}
-
-	return head;
-}
-
-listElement *listElementDeleteAll(listElement *head)
-{
-	listElement *toDelNode;
-	listElement *curNode = head;
-
-	while(curNode)
-	{
-		toDelNode = curNode;
-		curNode = curNode->next;
-		free(toDelNode);
-	}
-
-	return NULL;
-}
-
-listElement *listElementGet(listElement *head, unsigned int id)
-{
-	listElement *curNode = head;
-	int i = 0;
-
-	while(curNode)
-	{
-		if (i == id)
-			return curNode;
-
-		curNode = curNode->next;
-		++i;
-	}
-
-	return NULL;
-}
-
-/* libShake functions */
+/* Public functions */
 
 int Shake_Init()
 {
 	struct dirent **nameList;
 	int numOfEntries;
-	int i;
 
 	numOfDevices = 0;
 
@@ -120,6 +45,8 @@ int Shake_Init()
 	}
 	else
 	{
+		int i;
+
 		for (i = 0; i < numOfEntries; ++i)
 		{
 			Shake_Device dev;
@@ -136,8 +63,8 @@ int Shake_Init()
 			{
 				dev.id = numOfDevices;
 				listHead = listElementPrepend(listHead);
-				listHead->dev = malloc(sizeof(Shake_Device));
-				memcpy(listHead->dev, &dev, sizeof(Shake_Device));
+				listHead->item = malloc(sizeof(Shake_Device));
+				memcpy(listHead->item, &dev, sizeof(Shake_Device));
 				++numOfDevices;
 			}
 
@@ -154,17 +81,18 @@ void Shake_Quit()
 {
 	if (listHead != NULL)
 	{
-		listElement *toDelElem;
 		listElement *curElem = listHead;
 
 		while(curElem)
 		{
-			toDelElem = curElem;
+			Shake_Device *dev;
+			listElement *toDelElem = curElem;
 			curElem = curElem->next;
+			dev = (Shake_Device *)toDelElem->item;
 
-			Shake_Close(toDelElem->dev);
-			if (toDelElem->dev->node != NULL)
-				free(toDelElem->dev->node);
+			Shake_Close(dev);
+			if (dev->node != NULL)
+				free(dev->node);
 		}
 
 		listElementDeleteAll(listHead);
@@ -196,17 +124,20 @@ int Shake_Probe(Shake_Device *dev)
 
 Shake_Device *Shake_Open(unsigned int id)
 {
+	Shake_Device *dev;
+
 	if (id >= numOfDevices)
 		return NULL;
 
 	listElement *element = listElementGet(listHead, numOfDevices - 1 - id);
+	dev = (Shake_Device *)element->item;
 
-	if(!element->dev || !element->dev->node)
+	if(!dev || !dev->node)
 		return NULL;
 
-	element->dev->fd = open(element->dev->node, O_RDWR);
+	dev->fd = open(dev->node, O_RDWR);
 
-	return element->dev->fd ? element->dev : NULL;
+	return dev->fd ? dev : NULL;
 }
 
 int Shake_Query(Shake_Device *dev)
@@ -249,46 +180,46 @@ int Shake_Query(Shake_Device *dev)
 	return 0;
 }
 
-int Shake_DeviceId(const Shake_Device *dev)
+int Shake_DeviceId(Shake_Device *dev)
 {
 	return dev ? dev->id : -1;
 }
 
-const char *Shake_DeviceName(const Shake_Device *dev)
+const char *Shake_DeviceName(Shake_Device *dev)
 {
 	return dev ? dev->name : NULL;
 }
 
-int Shake_DeviceEffectCapacity(const Shake_Device *dev)
+int Shake_DeviceEffectCapacity(Shake_Device *dev)
 {
 	return dev ? dev->capacity : -1;
 }
 
-int Shake_QueryEffectSupport(const Shake_Device *dev, Shake_EffectType type)
+int Shake_QueryEffectSupport(Shake_Device *dev, Shake_EffectType type)
 {
 	/* Starts at a magic, non-zero number, FF_RUMBLE.
 	   Increments respectively to EffectType. */
 	return test_bit(FF_RUMBLE + type, dev->features) ? 1 : 0;
 }
 
-int Shake_QueryWaveformSupport(const Shake_Device *dev, Shake_PeriodicWaveform waveform)
+int Shake_QueryWaveformSupport(Shake_Device *dev, Shake_PeriodicWaveform waveform)
 {
 	/* Starts at a magic, non-zero number, FF_SQUARE.
 	   Increments respectively to PeriodicWaveform. */
 	return test_bit(FF_SQUARE + waveform, dev->features) ? 1 : 0;
 }
 
-int Shake_QueryGainSupport(const Shake_Device *dev)
+int Shake_QueryGainSupport(Shake_Device *dev)
 {
 	return test_bit(FF_GAIN, dev->features) ? 1 : 0;
 }
 
-int Shake_QueryAutocenterSupport(const Shake_Device *dev)
+int Shake_QueryAutocenterSupport(Shake_Device *dev)
 {
 	return test_bit(FF_AUTOCENTER, dev->features) ? 1 : 0;
 }
 
-void Shake_SetGain(const Shake_Device *dev, int gain)
+void Shake_SetGain(Shake_Device *dev, int gain)
 {
 	struct input_event ie;
 
@@ -310,7 +241,7 @@ void Shake_SetGain(const Shake_Device *dev, int gain)
 	}
 }
 
-void Shake_SetAutocenter(const Shake_Device *dev, int autocenter)
+void Shake_SetAutocenter(Shake_Device *dev, int autocenter)
 {
 	struct input_event ie;
 
@@ -343,7 +274,7 @@ void Shake_InitEffect(Shake_Effect *effect, Shake_EffectType type)
 	effect->id = -1;
 }
 
-int Shake_UploadEffect(const Shake_Device *dev, Shake_Effect *effect)
+int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 {
 	struct ff_effect e;
 
@@ -358,8 +289,8 @@ int Shake_UploadEffect(const Shake_Device *dev, Shake_Effect *effect)
 	{
 		e.type = FF_RUMBLE;
 		e.id = effect->id;
-		e.u.rumble.strong_magnitude = effect->rumble.strongMagnitude;
-		e.u.rumble.weak_magnitude = effect->rumble.weakMagnitude;
+		e.u.rumble.strong_magnitude = effect->u.rumble.strongMagnitude;
+		e.u.rumble.weak_magnitude = effect->u.rumble.weakMagnitude;
 		e.replay.delay = effect->delay;
 		e.replay.length = effect->length;
 	}
@@ -367,15 +298,15 @@ int Shake_UploadEffect(const Shake_Device *dev, Shake_Effect *effect)
 	{
 		e.type = FF_PERIODIC;
 		e.id = effect->id;
-		e.u.periodic.waveform = FF_SQUARE + effect->periodic.waveform;
-		e.u.periodic.period = effect->periodic.period;
-		e.u.periodic.magnitude = effect->periodic.magnitude;
-		e.u.periodic.offset = effect->periodic.offset;
-		e.u.periodic.phase = effect->periodic.phase;
-		e.u.periodic.envelope.attack_length = effect->periodic.envelope.attackLength;
-		e.u.periodic.envelope.attack_level = effect->periodic.envelope.attackLevel;
-		e.u.periodic.envelope.fade_length = effect->periodic.envelope.fadeLength;
-		e.u.periodic.envelope.fade_level = effect->periodic.envelope.fadeLevel;
+		e.u.periodic.waveform = FF_SQUARE + effect->u.periodic.waveform;
+		e.u.periodic.period = effect->u.periodic.period;
+		e.u.periodic.magnitude = effect->u.periodic.magnitude;
+		e.u.periodic.offset = effect->u.periodic.offset;
+		e.u.periodic.phase = effect->u.periodic.phase;
+		e.u.periodic.envelope.attack_length = effect->u.periodic.envelope.attackLength;
+		e.u.periodic.envelope.attack_level = effect->u.periodic.envelope.attackLevel;
+		e.u.periodic.envelope.fade_length = effect->u.periodic.envelope.fadeLength;
+		e.u.periodic.envelope.fade_level = effect->u.periodic.envelope.fadeLevel;
 		e.trigger.button = 0;
 		e.trigger.interval = 0;
 		e.direction = effect->direction;
@@ -386,11 +317,11 @@ int Shake_UploadEffect(const Shake_Device *dev, Shake_Effect *effect)
 	{
 		e.type = FF_CONSTANT;
 		e.id = effect->id;
-		e.u.constant.level = effect->constant.level;
-		e.u.constant.envelope.attack_length = effect->constant.envelope.attackLength;
-		e.u.constant.envelope.attack_level = effect->constant.envelope.attackLevel;
-		e.u.constant.envelope.fade_length = effect->constant.envelope.fadeLength;
-		e.u.constant.envelope.fade_level = effect->constant.envelope.fadeLevel;
+		e.u.constant.level = effect->u.constant.level;
+		e.u.constant.envelope.attack_length = effect->u.constant.envelope.attackLength;
+		e.u.constant.envelope.attack_level = effect->u.constant.envelope.attackLevel;
+		e.u.constant.envelope.fade_length = effect->u.constant.envelope.fadeLength;
+		e.u.constant.envelope.fade_level = effect->u.constant.envelope.fadeLevel;
 		e.trigger.button = 0;
 		e.trigger.interval = 0;
 		e.replay.delay = effect->delay;
@@ -400,12 +331,12 @@ int Shake_UploadEffect(const Shake_Device *dev, Shake_Effect *effect)
 	{
 		e.type = FF_RAMP;
 		e.id = effect->id;
-		e.u.ramp.start_level = effect->ramp.startLevel;
-		e.u.ramp.end_level = effect->ramp.endLevel;
-		e.u.ramp.envelope.attack_length = effect->ramp.envelope.attackLength;
-		e.u.ramp.envelope.attack_level = effect->ramp.envelope.attackLevel;
-		e.u.ramp.envelope.fade_length = effect->ramp.envelope.fadeLength;
-		e.u.ramp.envelope.fade_level = effect->ramp.envelope.fadeLevel;
+		e.u.ramp.start_level = effect->u.ramp.startLevel;
+		e.u.ramp.end_level = effect->u.ramp.endLevel;
+		e.u.ramp.envelope.attack_length = effect->u.ramp.envelope.attackLength;
+		e.u.ramp.envelope.attack_level = effect->u.ramp.envelope.attackLevel;
+		e.u.ramp.envelope.fade_length = effect->u.ramp.envelope.fadeLength;
+		e.u.ramp.envelope.fade_level = effect->u.ramp.envelope.fadeLevel;
 		e.trigger.button = 0;
 		e.trigger.interval = 0;
 		e.replay.delay = effect->delay;
@@ -426,7 +357,7 @@ int Shake_UploadEffect(const Shake_Device *dev, Shake_Effect *effect)
 	return e.id;
 }
 
-void Shake_EraseEffect(const Shake_Device *dev, int id)
+void Shake_EraseEffect(Shake_Device *dev, int id)
 {
 	if (!dev)
 		return;
@@ -441,7 +372,7 @@ void Shake_EraseEffect(const Shake_Device *dev, int id)
 	}
 }
 
-void Shake_Play(const Shake_Device *dev, int id)
+void Shake_Play(Shake_Device *dev, int id)
 {
 	if(!dev)
 		return;
@@ -461,7 +392,7 @@ void Shake_Play(const Shake_Device *dev, int id)
 	}
 }
 
-void Shake_Stop(const Shake_Device *dev, int id)
+void Shake_Stop(Shake_Device *dev, int id)
 {
 	if(!dev)
 		return;
@@ -481,7 +412,7 @@ void Shake_Stop(const Shake_Device *dev, int id)
 	}
 }
 
-void Shake_Close(const Shake_Device *dev)
+void Shake_Close(Shake_Device *dev)
 {
 	if (!dev)
 		return;

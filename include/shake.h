@@ -87,7 +87,7 @@ typedef struct Shake_Effect
 		Shake_EffectPeriodic periodic;
 		Shake_EffectConstant constant;
 		Shake_EffectRamp ramp;
-	};
+	} u;
 } Shake_Effect;
 
 /* libShake functions */
@@ -95,21 +95,21 @@ int Shake_Init();
 void Shake_Quit();
 int Shake_NumOfDevices();
 Shake_Device *Shake_Open(unsigned int id);
-void Shake_Close(const Shake_Device *dev);
-int Shake_DeviceId(const Shake_Device *dev);
-const char *Shake_DeviceName(const Shake_Device *dev);
-int Shake_DeviceEffectCapacity(const Shake_Device *dev);
-int Shake_QueryEffectSupport(const Shake_Device *dev, Shake_EffectType type);
-int Shake_QueryWaveformSupport(const Shake_Device *dev, Shake_PeriodicWaveform waveform);
-int Shake_QueryGainSupport(const Shake_Device *dev);
-int Shake_QueryAutocenterSupport(const Shake_Device *dev);
-void Shake_SetGain(const Shake_Device *dev, int gain);
-void Shake_SetAutocenter(const Shake_Device *dev, int autocenter);
+void Shake_Close(Shake_Device *dev);
+int Shake_DeviceId(Shake_Device *dev);
+const char *Shake_DeviceName(Shake_Device *dev);
+int Shake_DeviceEffectCapacity(Shake_Device *dev);
+int Shake_QueryEffectSupport(Shake_Device *dev, Shake_EffectType type);
+int Shake_QueryWaveformSupport(Shake_Device *dev, Shake_PeriodicWaveform waveform);
+int Shake_QueryGainSupport(Shake_Device *dev);
+int Shake_QueryAutocenterSupport(Shake_Device *dev);
+void Shake_SetGain(Shake_Device *dev, int gain);
+void Shake_SetAutocenter(Shake_Device *dev, int autocenter);
 void Shake_InitEffect(Shake_Effect *effect, Shake_EffectType type);
-int Shake_UploadEffect(const Shake_Device *dev, Shake_Effect *effect);
-void Shake_EraseEffect(const Shake_Device *dev, int id);
-void Shake_Play(const Shake_Device *dev, int id);
-void Shake_Stop(const Shake_Device *dev, int id);
+int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect);
+void Shake_EraseEffect(Shake_Device *dev, int id);
+void Shake_Play(Shake_Device *dev, int id);
+void Shake_Stop(Shake_Device *dev, int id);
 
 void Shake_SimplePeriodic(Shake_Effect *effect, Shake_PeriodicWaveform waveform, float forcePercent, float attackSecs, float sustainSecs, float fadeSecs);
 void Shake_SimpleRumble(Shake_Effect *effect, float strongPercent, float weakPercent, float secs);
