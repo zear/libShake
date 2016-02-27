@@ -222,12 +222,13 @@ Shake_Bool Shake_QueryAutocenterSupport(Shake_Device *dev)
 	return SHAKE_TEST(test_bit(FF_AUTOCENTER, dev->features));
 }
 
-void Shake_SetGain(Shake_Device *dev, int gain)
+Shake_Status Shake_SetGain(Shake_Device *dev, int gain)
 {
 	struct input_event ie;
 
-	if (!dev)
-		return;
+	if (!dev) {
+		return SHAKE_ERROR;
+	}
 
 	if (gain < 0)
 		gain = 0;
@@ -241,15 +242,19 @@ void Shake_SetGain(Shake_Device *dev, int gain)
 	if (write(dev->fd, &ie, sizeof(ie)) == -1)
 	{
 		perror("Shake_SetGain: Failed to set gain.");
+		return SHAKE_ERROR;
 	}
+
+	return SHAKE_OK;
 }
 
-void Shake_SetAutocenter(Shake_Device *dev, int autocenter)
+Shake_Status Shake_SetAutocenter(Shake_Device *dev, int autocenter)
 {
 	struct input_event ie;
 
-	if (!dev)
-		return;
+	if (!dev) {
+		return SHAKE_ERROR;
+	}
 
 	if (autocenter < 0)
 		autocenter = 0;
@@ -263,30 +268,42 @@ void Shake_SetAutocenter(Shake_Device *dev, int autocenter)
 	if (write(dev->fd, &ie, sizeof(ie)) == -1)
 	{
 		perror("Shake_SetAutocenter: Failed to set auto-center.");
+		return SHAKE_ERROR;
 	}
+
+	return SHAKE_OK;
 }
 
-void Shake_InitEffect(Shake_Effect *effect, Shake_EffectType type)
+Shake_Status Shake_InitEffect(Shake_Effect *effect, Shake_EffectType type)
 {
-	if (!effect)
-		return;
+	if (!effect) {
+		return SHAKE_ERROR;
+	}
+
 	memset(effect, 0, sizeof(*effect));
-	if (type < 0 || type >= SHAKE_EFFECT_COUNT)
+	if (type < 0 || type >= SHAKE_EFFECT_COUNT) {
 		perror("Shake_InitEffect: Unsupported effect.");
+		return SHAKE_ERROR;
+  }
 	effect->type = type;
 	effect->id = -1;
+
+	return SHAKE_OK;
 }
 
 int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 {
 	struct ff_effect e;
 
-	if (!dev)
+	if (!dev) {
     return SHAKE_ERROR;
-	if (!effect)
+	}
+	if (!effect) {
 		return SHAKE_ERROR;
-	if (effect->id < -1)
+	}
+	if (effect->id < -1) {
 		return SHAKE_ERROR;
+	}
 
 	if(effect->type == SHAKE_EFFECT_RUMBLE)
 	{
@@ -360,28 +377,33 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	return e.id;
 }
 
-void Shake_EraseEffect(Shake_Device *dev, int id)
+Shake_Status Shake_EraseEffect(Shake_Device *dev, int id)
 {
-	if (!dev)
-		return;
+	if (!dev) {
+		return SHAKE_ERROR;
+	}
 
-	if (id < 0)
-		return;
+	if (id < 0) {
+		return SHAKE_ERROR;
+	}
 
 	if (ioctl(dev->fd, EVIOCRMFF, id) == -1)
 	{
 		perror("Shake_EraseEffect: Failed to erase effect.");
-		return;
+		return SHAKE_ERROR;
 	}
+
+  return SHAKE_OK;
 }
 
-void Shake_Play(Shake_Device *dev, int id)
+Shake_Status Shake_Play(Shake_Device *dev, int id)
 {
-	if(!dev)
-		return;
-
-	if(id < 0)
-		return;
+	if(!dev) {
+		return SHAKE_ERROR;
+	}
+	if(id < 0) {
+		return SHAKE_ERROR;
+	}
 
 	struct input_event play;
 	play.type = EV_FF;
@@ -391,17 +413,20 @@ void Shake_Play(Shake_Device *dev, int id)
 	if (write(dev->fd, (const void*) &play, sizeof(play)) == -1)
 	{
 		perror("Shake_Play: Failed to send play event.");
-		return;
+		return SHAKE_ERROR;
 	}
+
+	return SHAKE_OK;
 }
 
-void Shake_Stop(Shake_Device *dev, int id)
+Shake_Status Shake_Stop(Shake_Device *dev, int id)
 {
-	if(!dev)
-		return;
-
-	if(id < 0)
-		return;
+	if(!dev) {
+		return SHAKE_ERROR;
+	}
+	if(id < 0) {
+		return SHAKE_ERROR;
+	}
 
 	struct input_event stop;
 	stop.type = EV_FF;
@@ -411,14 +436,19 @@ void Shake_Stop(Shake_Device *dev, int id)
 	if (write(dev->fd, (const void*) &stop, sizeof(stop)) == -1)
 	{
 		perror("Shake_Stop: Failed to send stop event.");
-		return;
+		return SHAKE_ERROR;
 	}
+
+	return SHAKE_OK;
 }
 
-void Shake_Close(Shake_Device *dev)
+Shake_Status Shake_Close(Shake_Device *dev)
 {
-	if (!dev)
-		return;
+	if (!dev) {
+		return SHAKE_ERROR;
+	}
 
 	close(dev->fd);
+
+	return SHAKE_OK;
 }
