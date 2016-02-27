@@ -9,6 +9,9 @@ extern "C" {
 #define SHAKE_MINOR_VERSION 2
 #define SHAKE_PATCH_VERSION 0
 
+#define SHAKE_ERROR	(-1)
+#define SHAKE_OK	0
+
 struct Shake_Device;
 typedef struct Shake_Device Shake_Device;
 
