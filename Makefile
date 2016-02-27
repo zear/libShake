@@ -1,7 +1,7 @@
 ifeq ($(PLATFORM), gcw0)
-  CC := /opt/gcw0-toolchain/usr/bin/mipsel-linux-gcc
-  STRIP := /opt/gcw0-toolchain/usr/bin/mipsel-linux-strip
-  BACKEND := LINUX
+  CC         := /opt/gcw0-toolchain/usr/bin/mipsel-linux-gcc
+  STRIP      := /opt/gcw0-toolchain/usr/bin/mipsel-linux-strip
+  BACKEND    := LINUX
 endif
 
 ifndef BACKEND
@@ -11,29 +11,33 @@ endif
 LIBNAME      := libshake
 SOVERSION    := 0
 
-SRC := $(wildcard src/common/*.c)
+SRCDIRS      := common
 
 ifeq ($(BACKEND), LINUX)
-  LIBEXT := .so
-  SONAME := $(LIBNAME)$(LIBEXT).$(SOVERSION)
-  PREFIX ?= /usr
-  LDFLAGS :=-Wl,-soname,$(SONAME)
-  SRC += $(wildcard src/linux/*.c)
+  LIBEXT     := .so
+  SONAME     := $(LIBNAME)$(LIBEXT).$(SOVERSION)
+  PREFIX     ?= /usr
+  LDFLAGS    :=-Wl,-soname,$(SONAME)
+  SRCDIRS    += linux
 else ifeq ($(BACKEND), OSX)
-  LIBEXT := .dylib
-  SONAME := $(LIBNAME).$(SOVERSION)$(LIBEXT)
-  PREFIX ?= /usr/local
-  LDFLAGS := -Wl,-framework,Cocoa -framework IOKit -framework CoreFoundation -framework ForceFeedback -install_name $(SONAME)
-  SRC += $(wildcard src/osx/*.c)
+  LIBEXT     := .dylib
+  SONAME     := $(LIBNAME).$(SOVERSION)$(LIBEXT)
+  PREFIX     ?= /usr/local
+  LDFLAGS    := -Wl,-framework,Cocoa -framework IOKit -framework CoreFoundation -framework ForceFeedback -install_name $(SONAME)
+  SRCDIRS    += osx
 endif
 
-CC ?= gcc
-STRIP ?= strip
-TARGET ?= $(SONAME)
-SYSROOT := $(shell $(CC) --print-sysroot)
-DESTDIR ?= $(SYSROOT)
-CFLAGS := -fPIC
-OBJ := $(SRC:.c=.o)
+CC           ?= gcc
+STRIP        ?= strip
+TARGET       ?= $(SONAME)
+SYSROOT      := $(shell $(CC) --print-sysroot)
+MACHINE      ?= $(shell $(CC) -dumpmachine)
+DESTDIR      ?= $(SYSROOT)
+CFLAGS       := -fPIC
+SRCDIR       := src
+OBJDIR       := obj/$(MACHINE)
+SRC          := $(foreach dir,$(SRCDIRS),$(sort $(wildcard $(addprefix $(SRCDIR)/,$(dir))/*.c)))
+OBJ          := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRC))
 
 ifdef DEBUG
   CFLAGS += -ggdb -Wall -Werror
@@ -51,7 +55,8 @@ ifdef DO_STRIP
 	$(STRIP) $@
 endif
 
-%.o:	%.c
+$(OBJ): $(OBJDIR)/%.o: $(SRCDIR)/%.c
+	mkdir -p $(@D)
 	$(CC) -c $(CFLAGS) $< -o $@ -I include
 
 install-headers:
@@ -64,4 +69,4 @@ install-lib:
 install: $(TARGET) install-headers install-lib
 
 clean:
-	rm -Rf $(TARGET) $(OBJ)
+	rm -Rf $(TARGET) $(OBJDIR)
