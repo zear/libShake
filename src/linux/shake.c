@@ -403,7 +403,7 @@ Shake_Status Shake_EraseEffect(Shake_Device *dev, int id)
 		return SHAKE_ERROR;
 	}
 
-  return SHAKE_OK;
+        return SHAKE_OK;
 }
 
 Shake_Status Shake_Play(Shake_Device *dev, int id)
