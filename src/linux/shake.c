@@ -20,7 +20,7 @@
 
 listElement *listHead;
 unsigned int numOfDevices;
-Shake_ErrorCode errorCode = -1;
+Shake_ErrorCode errorCode = SHAKE_EC_UNSET;
 
 /* Prototypes */
 
@@ -35,61 +35,61 @@ int nameFilter(const struct dirent *entry)
 
 /* Private functions */
 
-Shake_Status Shake_ecDevice()
+Shake_Status Shake_EcDevice()
 {
         errorCode = SHAKE_EC_DEVICE;
         return SHAKE_ERROR;
 }
 
-Shake_Status Shake_ecEffectId()
+Shake_Status Shake_EcEffectId()
 {
         errorCode = SHAKE_EC_EFFECT_ID;
         return SHAKE_ERROR;
 }
 
-Shake_Status Shake_ecComm()
+Shake_Status Shake_EcComm()
 {
         errorCode = SHAKE_EC_COMM;
         return SHAKE_ERROR;
 }
 
-Shake_Status Shake_ecQueryFeatures()
+Shake_Status Shake_EcQueryFeatures()
 {
         errorCode = SHAKE_EC_QUERY_FEATURES;
         return SHAKE_ERROR;
 }
 
-Shake_Status Shake_ecQueryCapacity()
+Shake_Status Shake_EcQueryCapacity()
 {
         errorCode = SHAKE_EC_QUERY_CAPACITY;
         return SHAKE_ERROR;
 }
 
-Shake_Status Shake_ecAccess()
+Shake_Status Shake_EcAccess()
 {
         errorCode = SHAKE_EC_ACCESS;
         return SHAKE_ERROR;
 }
 
-Shake_Status Shake_ecSupport()
+Shake_Status Shake_EcSupport()
 {
         errorCode = SHAKE_EC_SUPPORT;
         return SHAKE_ERROR;
 }
 
-Shake_Status Shake_ecUpload()
+Shake_Status Shake_EcUpload()
 {
         errorCode = SHAKE_EC_UPLOAD;
         return SHAKE_ERROR;
 }
 
-Shake_Status Shake_ecEffect()
+Shake_Status Shake_EcEffect()
 {
         errorCode = SHAKE_EC_EFFECT;
         return SHAKE_ERROR;
 }
 
-Shake_Status Shake_ecErase()
+Shake_Status Shake_EcErase()
 {
         errorCode = SHAKE_EC_ERASE;
         return SHAKE_ERROR;
@@ -113,7 +113,7 @@ Shake_Status Shake_Init()
 
 	if (numOfEntries < 0)
 	{
-                return Shake_ecAccess();
+                return Shake_EcAccess();
 	}
 	else
 	{
@@ -183,7 +183,7 @@ Shake_Status Shake_Probe(Shake_Device *dev)
 	int isHaptic;
 
 	if(!dev || !dev->node)
-                return Shake_ecDevice();
+               return Shake_EcDevice();
 
 	dev->fd = open(dev->node, O_RDWR);
 
@@ -220,10 +220,10 @@ Shake_Status Shake_Query(Shake_Device *dev)
 	int i;
 
 	if(!dev)
-               return Shake_ecDevice();
+               return Shake_EcDevice();
 
 	if (ioctl(dev->fd, EVIOCGBIT(EV_FF, sizeof(dev->features)), dev->features) == -1)
-                return Shake_ecQueryFeatures();
+                return Shake_EcQueryFeatures();
 
 	for (i = 0; i < size; ++i)
 	{
@@ -235,7 +235,7 @@ Shake_Status Shake_Query(Shake_Device *dev)
 		return SHAKE_ERROR;
 
 	if (ioctl(dev->fd, EVIOCGEFFECTS, &dev->capacity) == -1)
-                return Shake_ecQueryCapacity();
+                return Shake_EcQueryCapacity();
 
 	if (dev->capacity <= 0) /* Device doesn't support uploading effects. Ignore it. */
 		return SHAKE_ERROR;
@@ -292,7 +292,7 @@ Shake_Status Shake_SetGain(Shake_Device *dev, int gain)
 	struct input_event ie;
 
 	if (!dev)
-                return Shake_ecDevice();
+                return Shake_EcDevice();
 
 	if (gain < 0)
 		gain = 0;
@@ -304,7 +304,7 @@ Shake_Status Shake_SetGain(Shake_Device *dev, int gain)
 	ie.value = 0xFFFFUL * gain / 100;
 
 	if (write(dev->fd, &ie, sizeof(ie)) == -1)
-                Shake_ecComm();
+                Shake_EcComm();
 
 	return SHAKE_OK;
 }
@@ -314,7 +314,7 @@ Shake_Status Shake_SetAutocenter(Shake_Device *dev, int autocenter)
 	struct input_event ie;
 
 	if (!dev)
-                return Shake_ecDevice();
+                return Shake_EcDevice();
 
 	if (autocenter < 0)
 		autocenter = 0;
@@ -326,7 +326,7 @@ Shake_Status Shake_SetAutocenter(Shake_Device *dev, int autocenter)
 	ie.value = 0xFFFFUL * autocenter / 100;
 
 	if (write(dev->fd, &ie, sizeof(ie)) == -1)
-                return Shake_ecDevice();
+                return Shake_EcDevice();
 
 	return SHAKE_OK;
 }
@@ -334,11 +334,11 @@ Shake_Status Shake_SetAutocenter(Shake_Device *dev, int autocenter)
 Shake_Status Shake_InitEffect(Shake_Effect *effect, Shake_EffectType type)
 {
 	if (!effect)
-                return Shake_ecEffect();
+                return Shake_EcEffect();
 
 	memset(effect, 0, sizeof(*effect));
 	if (type < 0 || type >= SHAKE_EFFECT_COUNT)
-                return Shake_ecSupport();
+                return Shake_EcSupport();
 	effect->type = type;
 	effect->id = -1;
 
@@ -350,11 +350,11 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	struct ff_effect e;
 
 	if (!dev)
-                return Shake_ecDevice();
+                return Shake_EcDevice();
 	if (!effect)
-                return Shake_ecEffect();
+                return Shake_EcEffect();
 	if (effect->id < -1)
-                return Shake_ecEffectId();
+                return Shake_EcEffectId();
 
 	if(effect->type == SHAKE_EFFECT_RUMBLE)
 	{
@@ -415,12 +415,12 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	}
 	else
 	{
-                return Shake_ecSupport();
+                return Shake_EcSupport();
 	}
 
 	if (ioctl(dev->fd, EVIOCSFF, &e) == -1)
 	{
-                return Shake_ecUpload();
+                return Shake_EcUpload();
 	}
 
 	return e.id;
@@ -429,14 +429,14 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 Shake_Status Shake_EraseEffect(Shake_Device *dev, int id)
 {
 	if (!dev)
-                return Shake_ecDevice();
+                return Shake_EcDevice();
 
 	if (id < 0)
-                return Shake_ecEffectId();
+                return Shake_EcEffectId();
 
 	if (ioctl(dev->fd, EVIOCRMFF, id) == -1)
 	{
-                return Shake_ecErase();
+                return Shake_EcErase();
 	}
 
         return SHAKE_OK;
@@ -445,9 +445,9 @@ Shake_Status Shake_EraseEffect(Shake_Device *dev, int id)
 Shake_Status Shake_Play(Shake_Device *dev, int id)
 {
 	if(!dev)
-                return Shake_ecDevice();
+                return Shake_EcDevice();
 	if(id < 0)
-                return Shake_ecEffectId();
+                return Shake_EcEffectId();
 
 	struct input_event play;
 	play.type = EV_FF;
@@ -455,7 +455,7 @@ Shake_Status Shake_Play(Shake_Device *dev, int id)
 	play.value = FF_STATUS_PLAYING; /* play: FF_STATUS_PLAYING, stop: FF_STATUS_STOPPED */
 
 	if (write(dev->fd, (const void*) &play, sizeof(play)) == -1)
-                return Shake_ecComm();
+                return Shake_EcComm();
 
 	return SHAKE_OK;
 }
@@ -463,9 +463,9 @@ Shake_Status Shake_Play(Shake_Device *dev, int id)
 Shake_Status Shake_Stop(Shake_Device *dev, int id)
 {
 	if(!dev)
-                return Shake_ecDevice();
+                return Shake_EcDevice();
 	if(id < 0)
-                return Shake_ecEffectId();
+                return Shake_EcEffectId();
 
 	struct input_event stop;
 	stop.type = EV_FF;
@@ -473,7 +473,7 @@ Shake_Status Shake_Stop(Shake_Device *dev, int id)
 	stop.value = FF_STATUS_STOPPED;
 
 	if (write(dev->fd, (const void*) &stop, sizeof(stop)) == -1)
-                Shake_ecComm();
+                Shake_EcComm();
 
 	return SHAKE_OK;
 }
@@ -481,7 +481,7 @@ Shake_Status Shake_Stop(Shake_Device *dev, int id)
 Shake_Status Shake_Close(Shake_Device *dev)
 {
 	if (!dev)
-                return Shake_ecDevice();
+                return Shake_EcDevice();
 
 	close(dev->fd);
 

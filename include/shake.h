@@ -22,6 +22,7 @@ typedef enum Shake_Bool
 } Shake_Bool;
 
 typedef enum Shake_ErrorCode {
+    SHAKE_EC_UNSET,
     SHAKE_EC_ACCESS,
     SHAKE_EC_DEVICE,
     SHAKE_EC_EFFECT,
