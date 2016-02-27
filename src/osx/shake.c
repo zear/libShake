@@ -331,10 +331,10 @@ Shake_Bool Shake_QueryAutocenterSupport(Shake_Device *dev)
 	return SHAKE_FALSE;
 }
 
-void Shake_SetGain(Shake_Device *dev, int gain)
+Shake_Status Shake_SetGain(Shake_Device *dev, int gain)
 {
 	if (!dev)
-		return;
+		return SHAKE_ERROR;
 
 	if (gain < 0)
 		gain = 0;
@@ -346,13 +346,16 @@ void Shake_SetGain(Shake_Device *dev, int gain)
 	if (FFDeviceSetForceFeedbackProperty(dev->device, FFPROP_FFGAIN, &gain) != FF_OK)
 	{
 		perror("Shake_SetGain: Failed to set gain");
+		return SHAKE_ERROR;
 	}
+
+	return SHAKE_OK;
 }
 
-void Shake_SetAutocenter(Shake_Device *dev, int autocenter)
+Shake_Status Shake_SetAutocenter(Shake_Device *dev, int autocenter)
 {
 	if (!dev)
-		return;
+		return SHAKE_ERROR;
 
 	if (autocenter) /* OSX supports only OFF and ON values */
 	{
@@ -362,18 +365,27 @@ void Shake_SetAutocenter(Shake_Device *dev, int autocenter)
 	if (FFDeviceSetForceFeedbackProperty(dev->device, FFPROP_AUTOCENTER, &autocenter) != FF_OK)
 	{
 		perror("Shake_SetAutocenter: Failed to set auto-center");
+		return SHAKE_ERROR;
 	}
+
+	return SHAKE_OK;
 }
 
-void Shake_InitEffect(Shake_Effect *effect, Shake_EffectType type)
+Shake_Status Shake_InitEffect(Shake_Effect *effect, Shake_EffectType type)
 {
 	if (!effect)
-		return;
+		return SHAKE_ERROR;
+
 	memset(effect, 0, sizeof(*effect));
 	if (type >= SHAKE_EFFECT_COUNT)
+	{
 		perror("Shake_InitEffect: Unsupported effect");
+		return SHAKE_ERROR;
+	}
 	effect->type = type;
 	effect->id = -1;
+
+	return SHAKE_OK;
 }
 
 int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
@@ -555,16 +567,13 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	return ((effectContainer *)dev->effectList->item)->id;
 }
 
-void Shake_EraseEffect(Shake_Device *dev, int id)
+Shake_Status Shake_EraseEffect(Shake_Device *dev, int id)
 {
 	listElement *node;
 	effectContainer *effect = NULL;
 
-	if(!dev)
-		return;
-
-	if(id < 0)
-		return;
+	if(!dev || id < 0)
+		return SHAKE_ERROR;
 
 	node = dev->effectList;
 
@@ -581,28 +590,27 @@ void Shake_EraseEffect(Shake_Device *dev, int id)
 
 	if (!node || !effect)
 	{
-		return;
+		return SHAKE_ERROR;
 	}
 
 	if (FFDeviceReleaseEffect(dev->device, effect->effect))
 	{
 		perror("Shake_EraseEffect: Failed to erase effect");
-		return;
+		return SHAKE_ERROR;
 	}
 
 	dev->effectList = listElementDelete(dev->effectList, node);
+
+	return SHAKE_OK;
 }
 
-void Shake_Play(Shake_Device *dev, int id)
+Shake_Status Shake_Play(Shake_Device *dev, int id)
 {
 	listElement *node;
 	effectContainer *effect = NULL;
 
-	if(!dev)
-		return;
-
-	if(id < 0)
-		return;
+	if(!dev || id < 0)
+		return SHAKE_ERROR;
 
 	node = dev->effectList;
 
@@ -619,26 +627,25 @@ void Shake_Play(Shake_Device *dev, int id)
 
 	if (!node || !effect)
 	{
-		return;
+		return SHAKE_ERROR;
 	}
 
 	if (FFEffectStart(effect->effect, 1, 0) != FF_OK)
 	{
 		perror("Shake_Play: Failed to send play event");
-		return;
+		return SHAKE_ERROR;
 	}
+
+	return SHAKE_OK;
 }
 
-void Shake_Stop(Shake_Device *dev, int id)
+Shake_Status Shake_Stop(Shake_Device *dev, int id)
 {
 	listElement *node;
 	effectContainer *effect = NULL;
 
-	if(!dev)
-		return;
-
-	if(id < 0)
-		return;
+	if(!dev || id < 0)
+		return SHAKE_ERROR;
 
 	node = dev->effectList;
 
@@ -655,25 +662,25 @@ void Shake_Stop(Shake_Device *dev, int id)
 
 	if (!node || !effect)
 	{
-		return;
+		return SHAKE_ERROR;
 	}
 
 	if (FFEffectStop(effect->effect))
 	{
 		perror("Shake_Stop: Failed to send stop event");
-		return;
+		return SHAKE_ERROR;
 	}
+
+	return SHAKE_OK;
 }
 
-void Shake_Close(Shake_Device *dev)
+Shake_Status Shake_Close(Shake_Device *dev)
 {
 	int effectLen;
 	int i;
 
-	if (!dev)
-		return;
-	if (!dev->device)
-		return;
+	if (!dev || !dev->device)
+		return SHAKE_ERROR;
 
 	effectLen = listLength(dev->effectList);
 
@@ -683,13 +690,18 @@ void Shake_Close(Shake_Device *dev)
 		if (FFDeviceReleaseEffect(dev->device, effect->effect))
 		{
 			perror("Shake_Close: Failed to release effect");
-			return;
+			return SHAKE_ERROR;
 		}
 	}
 
 	dev->effectList = listElementDeleteAll(dev->effectList);
-	if (FFReleaseDevice(dev->device) == FF_OK)
+	if (FFReleaseDevice(dev->device) != FF_OK)
 	{
-		dev->device = 0;
+		perror("Shake_Close: Failed to release device");
+		return SHAKE_ERROR;
 	}
+
+	dev->device = 0;
+
+	return SHAKE_OK;
 }
