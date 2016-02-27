@@ -1,7 +1,5 @@
 /* libShake - a basic haptic library */
 
-#if defined(PLATFORM_LINUX)
-
 #include <unistd.h>
 #include <dirent.h>
 #include <fcntl.h>
@@ -13,8 +11,8 @@
 #include <stdio.h>
 
 #include "shake.h"
-#include "shake_private_linux.h"
-#include "helpers.h"
+#include "shake_private.h"
+#include "../common/helpers.h"
 
 listElement *listHead;
 unsigned int numOfDevices;
@@ -291,8 +289,8 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	{
 		e.type = FF_RUMBLE;
 		e.id = effect->id;
-		e.u.rumble.strong_magnitude = effect->rumble.strongMagnitude;
-		e.u.rumble.weak_magnitude = effect->rumble.weakMagnitude;
+		e.u.rumble.strong_magnitude = effect->u.rumble.strongMagnitude;
+		e.u.rumble.weak_magnitude = effect->u.rumble.weakMagnitude;
 		e.replay.delay = effect->delay;
 		e.replay.length = effect->length;
 	}
@@ -300,15 +298,15 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	{
 		e.type = FF_PERIODIC;
 		e.id = effect->id;
-		e.u.periodic.waveform = FF_SQUARE + effect->periodic.waveform;
-		e.u.periodic.period = effect->periodic.period;
-		e.u.periodic.magnitude = effect->periodic.magnitude;
-		e.u.periodic.offset = effect->periodic.offset;
-		e.u.periodic.phase = effect->periodic.phase;
-		e.u.periodic.envelope.attack_length = effect->periodic.envelope.attackLength;
-		e.u.periodic.envelope.attack_level = effect->periodic.envelope.attackLevel;
-		e.u.periodic.envelope.fade_length = effect->periodic.envelope.fadeLength;
-		e.u.periodic.envelope.fade_level = effect->periodic.envelope.fadeLevel;
+		e.u.periodic.waveform = FF_SQUARE + effect->u.periodic.waveform;
+		e.u.periodic.period = effect->u.periodic.period;
+		e.u.periodic.magnitude = effect->u.periodic.magnitude;
+		e.u.periodic.offset = effect->u.periodic.offset;
+		e.u.periodic.phase = effect->u.periodic.phase;
+		e.u.periodic.envelope.attack_length = effect->u.periodic.envelope.attackLength;
+		e.u.periodic.envelope.attack_level = effect->u.periodic.envelope.attackLevel;
+		e.u.periodic.envelope.fade_length = effect->u.periodic.envelope.fadeLength;
+		e.u.periodic.envelope.fade_level = effect->u.periodic.envelope.fadeLevel;
 		e.trigger.button = 0;
 		e.trigger.interval = 0;
 		e.direction = effect->direction;
@@ -319,11 +317,11 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	{
 		e.type = FF_CONSTANT;
 		e.id = effect->id;
-		e.u.constant.level = effect->constant.level;
-		e.u.constant.envelope.attack_length = effect->constant.envelope.attackLength;
-		e.u.constant.envelope.attack_level = effect->constant.envelope.attackLevel;
-		e.u.constant.envelope.fade_length = effect->constant.envelope.fadeLength;
-		e.u.constant.envelope.fade_level = effect->constant.envelope.fadeLevel;
+		e.u.constant.level = effect->u.constant.level;
+		e.u.constant.envelope.attack_length = effect->u.constant.envelope.attackLength;
+		e.u.constant.envelope.attack_level = effect->u.constant.envelope.attackLevel;
+		e.u.constant.envelope.fade_length = effect->u.constant.envelope.fadeLength;
+		e.u.constant.envelope.fade_level = effect->u.constant.envelope.fadeLevel;
 		e.trigger.button = 0;
 		e.trigger.interval = 0;
 		e.replay.delay = effect->delay;
@@ -333,12 +331,12 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	{
 		e.type = FF_RAMP;
 		e.id = effect->id;
-		e.u.ramp.start_level = effect->ramp.startLevel;
-		e.u.ramp.end_level = effect->ramp.endLevel;
-		e.u.ramp.envelope.attack_length = effect->ramp.envelope.attackLength;
-		e.u.ramp.envelope.attack_level = effect->ramp.envelope.attackLevel;
-		e.u.ramp.envelope.fade_length = effect->ramp.envelope.fadeLength;
-		e.u.ramp.envelope.fade_level = effect->ramp.envelope.fadeLevel;
+		e.u.ramp.start_level = effect->u.ramp.startLevel;
+		e.u.ramp.end_level = effect->u.ramp.endLevel;
+		e.u.ramp.envelope.attack_length = effect->u.ramp.envelope.attackLength;
+		e.u.ramp.envelope.attack_level = effect->u.ramp.envelope.attackLevel;
+		e.u.ramp.envelope.fade_length = effect->u.ramp.envelope.fadeLength;
+		e.u.ramp.envelope.fade_level = effect->u.ramp.envelope.fadeLevel;
 		e.trigger.button = 0;
 		e.trigger.interval = 0;
 		e.replay.delay = effect->delay;
@@ -421,5 +419,3 @@ void Shake_Close(Shake_Device *dev)
 
 	close(dev->fd);
 }
-
-#endif /* PLATFORM_LINUX */

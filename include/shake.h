@@ -87,7 +87,7 @@ typedef struct Shake_Effect
 		Shake_EffectPeriodic periodic;
 		Shake_EffectConstant constant;
 		Shake_EffectRamp ramp;
-	};
+	} u;
 } Shake_Effect;
 
 /* libShake functions */

@@ -1,11 +1,9 @@
 #ifndef _SHAKE_PRIVATE_H_
 #define _SHAKE_PRIVATE_H_
 
-#if defined(PLATFORM_LINUX)
-
 #include <dirent.h>
 #include <linux/input.h>
-#include "helpers.h"
+#include "../common/helpers.h"
 
 #define SHAKE_DIR_NODES		"/dev/input"
 
@@ -33,7 +31,5 @@ extern listElement *listHead;
 extern unsigned int numOfDevices;
 
 int nameFilter(const struct dirent *entry);
-
-#endif /* PLATFORM_LINUX */
 
 #endif /* _SHAKE_PRIVATE_H_ */
