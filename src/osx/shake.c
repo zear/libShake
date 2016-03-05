@@ -9,6 +9,7 @@
 #include "shake.h"
 #include "./shake_private.h"
 #include "../common/helpers.h"
+#include "../common/error.h"
 
 listElement *listHead;
 unsigned int numOfDevices;
