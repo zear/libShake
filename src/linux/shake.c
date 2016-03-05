@@ -15,12 +15,12 @@
 #include "shake.h"
 #include "shake_private.h"
 #include "../common/helpers.h"
+#include "../common/error.h"
 
 #define SHAKE_TEST(x) ((x) ? SHAKE_TRUE : SHAKE_FALSE)
 
 listElement *listHead;
 unsigned int numOfDevices;
-Shake_ErrorCode errorCode = SHAKE_EC_UNSET;
 
 /* Prototypes */
 
@@ -33,74 +33,7 @@ int nameFilter(const struct dirent *entry)
 	return !strncmp(filter, entry->d_name, strlen(filter));
 }
 
-/* Private functions */
-
-Shake_Status Shake_EcDevice()
-{
-        errorCode = SHAKE_EC_DEVICE;
-        return SHAKE_ERROR;
-}
-
-Shake_Status Shake_EcEffectId()
-{
-        errorCode = SHAKE_EC_EFFECT_ID;
-        return SHAKE_ERROR;
-}
-
-Shake_Status Shake_EcComm()
-{
-        errorCode = SHAKE_EC_COMM;
-        return SHAKE_ERROR;
-}
-
-Shake_Status Shake_EcQueryFeatures()
-{
-        errorCode = SHAKE_EC_QUERY_FEATURES;
-        return SHAKE_ERROR;
-}
-
-Shake_Status Shake_EcQueryCapacity()
-{
-        errorCode = SHAKE_EC_QUERY_CAPACITY;
-        return SHAKE_ERROR;
-}
-
-Shake_Status Shake_EcAccess()
-{
-        errorCode = SHAKE_EC_ACCESS;
-        return SHAKE_ERROR;
-}
-
-Shake_Status Shake_EcSupport()
-{
-        errorCode = SHAKE_EC_SUPPORT;
-        return SHAKE_ERROR;
-}
-
-Shake_Status Shake_EcUpload()
-{
-        errorCode = SHAKE_EC_UPLOAD;
-        return SHAKE_ERROR;
-}
-
-Shake_Status Shake_EcEffect()
-{
-        errorCode = SHAKE_EC_EFFECT;
-        return SHAKE_ERROR;
-}
-
-Shake_Status Shake_EcErase()
-{
-        errorCode = SHAKE_EC_ERASE;
-        return SHAKE_ERROR;
-}
-
 /* Public functions */
-
-Shake_ErrorCode Shake_GetErrorCode()
-{
-        return errorCode;
-}
 
 Shake_Status Shake_Init()
 {
