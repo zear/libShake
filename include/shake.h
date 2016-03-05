@@ -123,8 +123,10 @@ Shake_Status Shake_EraseEffect(Shake_Device *dev, int id);
 Shake_Status Shake_Play(Shake_Device *dev, int id);
 Shake_Status Shake_Stop(Shake_Device *dev, int id);
 
-void Shake_SimplePeriodic(Shake_Effect *effect, Shake_PeriodicWaveform waveform, float forcePercent, float attackSecs, float sustainSecs, float fadeSecs);
 void Shake_SimpleRumble(Shake_Effect *effect, float strongPercent, float weakPercent, float secs);
+void Shake_SimplePeriodic(Shake_Effect *effect, Shake_PeriodicWaveform waveform, float forcePercent, float attackSecs, float sustainSecs, float fadeSecs);
+void Shake_SimpleConstant(Shake_Effect *effect, float forcePercent, float attackSecs, float sustainSecs, float fadeSecs);
+void Shake_SimpleRamp(Shake_Effect *effect, float startForcePercent, float endForcePercent, float attackSecs, float sustainSecs, float fadeSecs);
 
 #ifdef __cplusplus
 }
