@@ -3,7 +3,11 @@ libShake
 
 About
 -----
-libShake is a basic haptic library using the Linux Force Feedback API.
+libShake is a simple, cross-platform haptic library.
+
+Currently supported backends:
+* Linux
+* OS X
 
 Authors
 -------
