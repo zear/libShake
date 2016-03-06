@@ -1,5 +1,6 @@
 #include <shake.h>
 #include <stdio.h>
+#include <unistd.h>
 
 int main()
 {
@@ -15,7 +16,7 @@ int main()
 
 		Shake_InitEffect(&effect, SHAKE_EFFECT_PERIODIC);
 		effect.u.periodic.waveform		= SHAKE_PERIODIC_SINE;
-		effect.u.periodic.period			= 0.1*0x100;
+		effect.u.periodic.period		= 0.1*0x100;
 		effect.u.periodic.magnitude		= 0x6000;
 		effect.u.periodic.envelope.attackLength	= 0x100;
 		effect.u.periodic.envelope.attackLevel	= 0;
