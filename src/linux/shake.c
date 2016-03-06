@@ -302,19 +302,24 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	if (!dev || !effect || effect->id < -1)
 		return Shake_EmitErrorCode(SHAKE_EC_ARG);
 
+	/* Common parameters. */
+	e.id = effect->id;
+	e.direction = effect->direction;
+	e.trigger.button = 0;
+	e.trigger.interval = 0;
+	e.replay.delay = effect->delay;
+	e.replay.length = effect->length;
+
+	/* Effect type specific parameters. */
 	if(effect->type == SHAKE_EFFECT_RUMBLE)
 	{
 		e.type = FF_RUMBLE;
-		e.id = effect->id;
 		e.u.rumble.strong_magnitude = effect->u.rumble.strongMagnitude;
 		e.u.rumble.weak_magnitude = effect->u.rumble.weakMagnitude;
-		e.replay.delay = effect->delay;
-		e.replay.length = effect->length;
 	}
 	else if(effect->type == SHAKE_EFFECT_PERIODIC)
 	{
 		e.type = FF_PERIODIC;
-		e.id = effect->id;
 		e.u.periodic.waveform = FF_SQUARE + effect->u.periodic.waveform;
 		e.u.periodic.period = effect->u.periodic.period;
 		e.u.periodic.magnitude = effect->u.periodic.magnitude;
@@ -324,40 +329,25 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 		e.u.periodic.envelope.attack_level = effect->u.periodic.envelope.attackLevel;
 		e.u.periodic.envelope.fade_length = effect->u.periodic.envelope.fadeLength;
 		e.u.periodic.envelope.fade_level = effect->u.periodic.envelope.fadeLevel;
-		e.trigger.button = 0;
-		e.trigger.interval = 0;
-		e.direction = effect->direction;
-		e.replay.delay = effect->delay;
-		e.replay.length = effect->length;
 	}
 	else if(effect->type == SHAKE_EFFECT_CONSTANT)
 	{
 		e.type = FF_CONSTANT;
-		e.id = effect->id;
 		e.u.constant.level = effect->u.constant.level;
 		e.u.constant.envelope.attack_length = effect->u.constant.envelope.attackLength;
 		e.u.constant.envelope.attack_level = effect->u.constant.envelope.attackLevel;
 		e.u.constant.envelope.fade_length = effect->u.constant.envelope.fadeLength;
 		e.u.constant.envelope.fade_level = effect->u.constant.envelope.fadeLevel;
-		e.trigger.button = 0;
-		e.trigger.interval = 0;
-		e.replay.delay = effect->delay;
-		e.replay.length = effect->length;
 	}
 	else if(effect->type == SHAKE_EFFECT_RAMP)
 	{
 		e.type = FF_RAMP;
-		e.id = effect->id;
 		e.u.ramp.start_level = effect->u.ramp.startLevel;
 		e.u.ramp.end_level = effect->u.ramp.endLevel;
 		e.u.ramp.envelope.attack_length = effect->u.ramp.envelope.attackLength;
 		e.u.ramp.envelope.attack_level = effect->u.ramp.envelope.attackLevel;
 		e.u.ramp.envelope.fade_length = effect->u.ramp.envelope.fadeLength;
 		e.u.ramp.envelope.fade_level = effect->u.ramp.envelope.fadeLevel;
-		e.trigger.button = 0;
-		e.trigger.interval = 0;
-		e.replay.delay = effect->delay;
-		e.replay.length = effect->length;
 	}
 	else
 	{

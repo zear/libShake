@@ -410,7 +410,7 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	rglDirection[0] = effect->direction;
 	rglDirection[1] = 0;
 
-	/* Global parameters. */
+	/* Common parameters. */
 	memset(&e, 0, sizeof(e));
 	e.dwSize = sizeof(FFEFFECT);
 	e.dwFlags = FFEFF_POLAR | FFEFF_OBJECTOFFSETS;
@@ -420,9 +420,12 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	e.rgdwAxes = rgdwAxes;
 	e.rglDirection = rglDirection;
 	e.dwStartDelay = effect->delay;
+	e.dwTriggerButton = FFEB_NOTRIGGER;
+	e.dwTriggerRepeatInterval = 0;
 
 	e.dwGain = FF_FFNOMINALMAX;
 
+	/* Effect type specific parameters. */
 /*
 	if(effect->type == SHAKE_EFFECT_RUMBLE)
 	{
@@ -469,8 +472,6 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 		e.lpEnvelope->dwAttackLevel = effect->u.periodic.envelope.attackLevel;
 		e.lpEnvelope->dwFadeTime = effect->u.periodic.envelope.fadeLength * 1000;
 		e.lpEnvelope->dwFadeLevel = effect->u.periodic.envelope.fadeLevel;
-		e.dwTriggerButton = FFEB_NOTRIGGER;
-		e.dwTriggerRepeatInterval = 0;
 
 		e.cbTypeSpecificParams = sizeof(FFPERIODIC);
 		e.lpvTypeSpecificParams = &pf;
@@ -489,8 +490,6 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 		e.lpEnvelope->dwAttackLevel = effect->u.constant.envelope.attackLevel;
 		e.lpEnvelope->dwFadeTime = effect->u.constant.envelope.fadeLength * 1000;
 		e.lpEnvelope->dwFadeLevel = effect->u.constant.envelope.fadeLevel;
-		e.dwTriggerButton = FFEB_NOTRIGGER;
-		e.dwTriggerRepeatInterval = 0;
 
 		e.cbTypeSpecificParams = sizeof(FFCONSTANTFORCE);
 		e.lpvTypeSpecificParams = &cf;
@@ -510,8 +509,6 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 		e.lpEnvelope->dwAttackLevel = effect->u.ramp.envelope.attackLevel;
 		e.lpEnvelope->dwFadeTime = effect->u.ramp.envelope.fadeLength * 1000;
 		e.lpEnvelope->dwFadeLevel = effect->u.ramp.envelope.fadeLevel;
-		e.dwTriggerButton = FFEB_NOTRIGGER;
-		e.dwTriggerRepeatInterval = 0;
 
 		e.cbTypeSpecificParams = sizeof(FFRAMPFORCE);
 		e.lpvTypeSpecificParams = &rf;
