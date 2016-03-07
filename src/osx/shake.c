@@ -22,7 +22,7 @@ int convertMagnitude(int magnitude);
 
 int convertMagnitude(int magnitude)
 {
-	return ((float)magnitude/0x8fff) * FF_FFNOMINALMAX;
+	return ((float)magnitude/SHAKE_RANGE_MAX) * FF_FFNOMINALMAX;
 }
 
 /* Public functions */

@@ -9,6 +9,8 @@ extern "C" {
 #define SHAKE_MINOR_VERSION 2
 #define SHAKE_PATCH_VERSION 0
 
+#define SHAKE_RANGE_MAX	0x7FFF
+
 typedef enum Shake_Status
 {
 	SHAKE_ERROR	= -1,
