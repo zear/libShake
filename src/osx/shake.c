@@ -232,7 +232,8 @@ Shake_Bool Shake_QueryEffectSupport(Shake_Device *dev, Shake_EffectType type)
 	switch (type)
 	{
 		case SHAKE_EFFECT_RUMBLE:
-			return SHAKE_FALSE; // TODO
+			/* Emulate EFFECT_RUMBLE with EFFECT_CONSTANT. */
+			query = FFCAP_ET_CONSTANTFORCE;
 		break;
 		case SHAKE_EFFECT_PERIODIC:
 		{
@@ -426,13 +427,26 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	e.dwGain = FF_FFNOMINALMAX;
 
 	/* Effect type specific parameters. */
-/*
 	if(effect->type == SHAKE_EFFECT_RUMBLE)
 	{
-		// TODO
+		/* Emulate EFFECT_RUMBLE with EFFECT_CONSTANT. */
+		FFCONSTANTFORCE cf;
+
+		/* Only strongMagnitude is used; weakMagnitude is ignored. */
+		cf.lMagnitude = convertMagnitude(effect->u.rumble.strongMagnitude);
+
+		effectType = kFFEffectType_ConstantForce_ID;
+		e.lpEnvelope = malloc(sizeof(FFENVELOPE));
+		e.lpEnvelope->dwSize = sizeof(FFENVELOPE);
+		e.lpEnvelope->dwAttackTime = 0;
+		e.lpEnvelope->dwAttackLevel = 0;
+		e.lpEnvelope->dwFadeTime = 0;
+		e.lpEnvelope->dwFadeLevel = 0;
+
+		e.cbTypeSpecificParams = sizeof(FFCONSTANTFORCE);
+		e.lpvTypeSpecificParams = &cf;
 	}
-*/
-	if(effect->type == SHAKE_EFFECT_PERIODIC)
+	else if(effect->type == SHAKE_EFFECT_PERIODIC)
 	{
 		FFPERIODIC pf;
 
@@ -476,7 +490,6 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 		e.cbTypeSpecificParams = sizeof(FFPERIODIC);
 		e.lpvTypeSpecificParams = &pf;
 	}
-
 	else if(effect->type == SHAKE_EFFECT_CONSTANT)
 	{
 		FFCONSTANTFORCE cf;
@@ -494,7 +507,6 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 		e.cbTypeSpecificParams = sizeof(FFCONSTANTFORCE);
 		e.lpvTypeSpecificParams = &cf;
 	}
-
 	else if(effect->type == SHAKE_EFFECT_RAMP)
 	{
 		FFRAMPFORCE rf;
@@ -513,7 +525,6 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 		e.cbTypeSpecificParams = sizeof(FFRAMPFORCE);
 		e.lpvTypeSpecificParams = &rf;
 	}
-
 	else
 	{
 		return Shake_EmitErrorCode(SHAKE_EC_SUPPORT);
