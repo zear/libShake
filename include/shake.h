@@ -5,11 +5,39 @@
 extern "C" {
 #endif
 
+#include <stdint.h>
+
 #define SHAKE_MAJOR_VERSION 0
 #define SHAKE_MINOR_VERSION 2
 #define SHAKE_PATCH_VERSION 0
 
-#define SHAKE_RANGE_MAX	0x7FFF
+#define SHAKE_ENVELOPE_ATTACK_LENGTH_MAX	0x7FFF
+#define SHAKE_ENVELOPE_FADE_LENGTH_MAX		0x7FFF
+#define SHAKE_ENVELOPE_ATTACK_LEVEL_MAX		0x7FFF
+#define SHAKE_ENVELOPE_FADE_LEVEL_MAX		0x7FFF
+
+#define SHAKE_RUMBLE_STRONG_MAGNITUDE_MAX	0x7FFF
+#define SHAKE_RUMBLE_WEAK_MAGNITUDE_MAX		0x7FFF
+
+#define SHAKE_PERIODIC_PERIOD_MAX		0x7FFF
+#define SHAKE_PERIODIC_MAGNITUDE_MIN		(-0x7FFF)
+#define SHAKE_PERIODIC_MAGNITUDE_MAX		0x7FFF
+#define SHAKE_PERIODIC_OFFSET_MIN		(-0x7FFF)
+#define SHAKE_PERIODIC_OFFSET_MAX		0x7FFF
+#define SHAKE_PERIODIC_PHASE_MAX		0x7FFF
+
+#define SHAKE_CONSTANT_LEVEL_MIN		(-0x7FFF)
+#define SHAKE_CONSTANT_LEVEL_MAX		0x7FFF
+
+#define SHAKE_RAMP_START_LEVEL_MIN		(-0x7FFF)
+#define SHAKE_RAMP_START_LEVEL_MAX		0x7FFF
+#define SHAKE_RAMP_END_LEVEL_MIN		(-0x7FFF)
+#define SHAKE_RAMP_END_LEVEL_MAX		0x7FFF
+
+#define SHAKE_EFFECT_ID_MIN			(-0x0001)
+#define SHAKE_EFFECT_DIRECTION_MAX		0xFFFE
+#define SHAKE_EFFECT_LENGTH_MAX			0x7FFF
+#define SHAKE_EFFECT_DELAY_MAX			0x7FFF
 
 typedef enum Shake_Status
 {
@@ -23,7 +51,8 @@ typedef enum Shake_Bool
 	SHAKE_TRUE	= 1
 } Shake_Bool;
 
-typedef enum Shake_ErrorCode {
+typedef enum Shake_ErrorCode
+{
 	SHAKE_EC_UNSET,
 	SHAKE_EC_SUPPORT,
 	SHAKE_EC_DEVICE,
@@ -63,48 +92,48 @@ typedef enum Shake_EffectType
 
 typedef struct Shake_Envelope
 {
-	int attackLength;
-	int attackLevel;
-	int fadeLength;
-	int fadeLevel;
+	uint16_t attackLength;
+	uint16_t attackLevel;
+	uint16_t fadeLength;
+	uint16_t fadeLevel;
 } Shake_Envelope;
 
 typedef struct Shake_EffectRumble
 {
-	int strongMagnitude;
-	int weakMagnitude;
+	uint16_t strongMagnitude;
+	uint16_t weakMagnitude;
 } Shake_EffectRumble;
 
 typedef struct Shake_EffectPeriodic
 {
 	Shake_PeriodicWaveform waveform;
-	int period;
-	int magnitude;
-	int offset;
-	int phase;
+	uint16_t period;
+	int16_t magnitude;
+	int16_t offset;
+	uint16_t phase;
 	Shake_Envelope envelope;
 } Shake_EffectPeriodic;
 
 typedef struct Shake_EffectConstant
 {
-	int level;
+	int16_t level;
 	Shake_Envelope envelope;
 } Shake_EffectConstant;
 
 typedef struct Shake_EffectRamp
 {
-	int startLevel;
-	int endLevel;
+	int16_t startLevel;
+	int16_t endLevel;
 	Shake_Envelope envelope;
 } Shake_EffectRamp;
 
 typedef struct Shake_Effect
 {
 	Shake_EffectType type;
-	int id;
-	int direction;
-	int length;
-	int delay;
+	int16_t id;
+	uint16_t direction;
+	uint16_t length;
+	uint16_t delay;
 	union
 	{
 		Shake_EffectRumble rumble;
