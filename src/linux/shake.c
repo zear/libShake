@@ -351,7 +351,7 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	}
 	else
 	{
-		return Shake_EmitErrorCode(SHAKE_EC_SUPPORT);
+		return (effect->type >= SHAKE_EFFECT_COUNT ? Shake_EmitErrorCode(SHAKE_EC_ARG) : Shake_EmitErrorCode(SHAKE_EC_SUPPORT));
 	}
 
 	if (ioctl(dev->fd, EVIOCSFF, &e) == -1)
