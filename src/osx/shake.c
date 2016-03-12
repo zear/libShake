@@ -232,8 +232,8 @@ Shake_Bool Shake_QueryEffectSupport(Shake_Device *dev, Shake_EffectType type)
 	switch (type)
 	{
 		case SHAKE_EFFECT_RUMBLE:
-			/* Emulate EFFECT_RUMBLE with EFFECT_CONSTANT. */
-			query = FFCAP_ET_CONSTANTFORCE;
+			/* Emulate EFFECT_RUMBLE with EFFECT_PERIODIC. */
+			return Shake_QueryWaveformSupport(dev, SHAKE_PERIODIC_SINE) ? SHAKE_TRUE : SHAKE_FALSE;
 		break;
 		case SHAKE_EFFECT_PERIODIC:
 		{
@@ -429,13 +429,28 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	/* Effect type specific parameters. */
 	if(effect->type == SHAKE_EFFECT_RUMBLE)
 	{
-		/* Emulate EFFECT_RUMBLE with EFFECT_CONSTANT. */
-		FFCONSTANTFORCE cf;
+		/* Emulate EFFECT_RUMBLE with EFFECT_PERIODIC. */
+		int magnitude;
+		FFPERIODIC pf;
 
-		/* Only strongMagnitude is used; weakMagnitude is ignored. */
-		cf.lMagnitude = convertMagnitude(effect->u.rumble.strongMagnitude);
+		/*
+		 * The magnitude is calculated as average of
+		 * 2/3 of strongMagnitude and 1/3 of weakMagnitude.
+		 * This follows the same ratios as in the Linux kernel.
+		 */
+		magnitude = effect->u.rumble.strongMagnitude/3 + effect->u.rumble.weakMagnitude/6;
 
-		effectType = kFFEffectType_ConstantForce_ID;
+		if (magnitude > SHAKE_PERIODIC_MAGNITUDE_MAX)
+		{
+			magnitude = SHAKE_PERIODIC_MAGNITUDE_MAX;
+		}
+
+		pf.dwMagnitude = convertMagnitude(magnitude);
+		pf.lOffset = 0;
+		pf.dwPhase = 0;
+		pf.dwPeriod = 50 * 1000; /* Magic number from the Linux kernel implementation. */
+
+		effectType = kFFEffectType_Sine_ID;
 		e.lpEnvelope = malloc(sizeof(FFENVELOPE));
 		e.lpEnvelope->dwSize = sizeof(FFENVELOPE);
 		e.lpEnvelope->dwAttackTime = 0;
@@ -443,8 +458,8 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 		e.lpEnvelope->dwFadeTime = 0;
 		e.lpEnvelope->dwFadeLevel = 0;
 
-		e.cbTypeSpecificParams = sizeof(FFCONSTANTFORCE);
-		e.lpvTypeSpecificParams = &cf;
+		e.cbTypeSpecificParams = sizeof(FFPERIODIC);
+		e.lpvTypeSpecificParams = &pf;
 	}
 	else if(effect->type == SHAKE_EFFECT_PERIODIC)
 	{
