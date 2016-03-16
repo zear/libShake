@@ -399,7 +399,7 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	HRESULT result;
 	FFEFFECT e;
 	CFUUIDRef effectType;
-	effectContainer *container;
+	effectContainer *container = NULL;
 	DWORD rgdwAxes[2];
 	LONG rglDirection[2];
 
@@ -545,23 +545,57 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 		return (effect->type >= SHAKE_EFFECT_COUNT ? Shake_EmitErrorCode(SHAKE_EC_ARG) : Shake_EmitErrorCode(SHAKE_EC_SUPPORT));
 	}
 
-	dev->effectList = listElementPrepend(dev->effectList);
-	dev->effectList->item = malloc(sizeof(effectContainer));
-	container = dev->effectList->item;
-	container->id = listLength(dev->effectList) - 1;
-	container->effect = 0;
+	if (effect->id == -1) /* Create a new effect. */
+	{
+		dev->effectList = listElementPrepend(dev->effectList);
+		dev->effectList->item = malloc(sizeof(effectContainer));
+		container = dev->effectList->item;
+		container->id = listLength(dev->effectList) - 1;
+		container->effect = 0;
 
-	result = FFDeviceCreateEffect(dev->device, effectType, &e, &container->effect);
+		result = FFDeviceCreateEffect(dev->device, effectType, &e, &container->effect);
+
+		if ((unsigned int)result != FF_OK)
+		{
+			free(e.lpEnvelope);
+			dev->effectList = listElementDelete(dev->effectList, dev->effectList);
+			return Shake_EmitErrorCode(SHAKE_EC_TRANSFER);
+		}
+	}
+	else /* Update existing effect. */
+	{
+		listElement *node = dev->effectList;
+		effectContainer *item;
+
+		while (node)
+		{
+			item = (effectContainer *)node->item;
+			if (item->id == effect->id)
+			{
+				container = item;
+				break;
+			}
+
+			node = node->next;
+		}
+
+		if (container)
+		{
+			int flags = FFEP_AXES | FFEP_DIRECTION | FFEP_DURATION | FFEP_ENVELOPE | FFEP_GAIN | FFEP_SAMPLEPERIOD | FFEP_STARTDELAY | FFEP_TRIGGERBUTTON | FFEP_TYPESPECIFICPARAMS;
+
+			result = FFEffectSetParameters(container->effect, &e, flags);
+
+			if ((unsigned int)result != FF_OK)
+			{
+				free(e.lpEnvelope);
+				return Shake_EmitErrorCode(SHAKE_EC_TRANSFER);
+			}
+		}
+	}
 
 	free(e.lpEnvelope);
 
-	if ((unsigned int)result != FF_OK)
-	{
-		dev->effectList = listElementDelete(dev->effectList, dev->effectList);
-		return Shake_EmitErrorCode(SHAKE_EC_TRANSFER);
-	}
-
-	return ((effectContainer *)dev->effectList->item)->id;
+	return container ? container->id : Shake_EmitErrorCode(SHAKE_EC_EFFECT);
 }
 
 Shake_Status Shake_EraseEffect(Shake_Device *dev, int id)
