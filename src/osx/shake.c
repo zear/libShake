@@ -526,8 +526,8 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	{
 		FFRAMPFORCE rf;
 
-		rf.lStart = ((float)effect->u.ramp.startLevel/0xffff) * FF_FFNOMINALMAX;
-		rf.lEnd = ((float)effect->u.ramp.endLevel/0xffff) * FF_FFNOMINALMAX;
+		rf.lStart = ((float)effect->u.ramp.startLevel/SHAKE_RAMP_START_LEVEL_MAX) * FF_FFNOMINALMAX;
+		rf.lEnd = ((float)effect->u.ramp.endLevel/SHAKE_RAMP_END_LEVEL_MAX) * FF_FFNOMINALMAX;
 
 		effectType = kFFEffectType_RampForce_ID;
 		e.lpEnvelope = malloc(sizeof(FFENVELOPE));
