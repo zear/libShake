@@ -8,7 +8,7 @@ extern "C" {
 #include <stdint.h>
 
 #define SHAKE_MAJOR_VERSION 0
-#define SHAKE_MINOR_VERSION 2
+#define SHAKE_MINOR_VERSION 3
 #define SHAKE_PATCH_VERSION 0
 
 #define SHAKE_ENVELOPE_ATTACK_LENGTH_MAX	0x7FFF
