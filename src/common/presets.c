@@ -6,7 +6,6 @@ void Shake_SimpleRumble(Shake_Effect *effect, float strongPercent, float weakPer
 	Shake_InitEffect(effect, SHAKE_EFFECT_RUMBLE);
 	effect->u.rumble.strongMagnitude = SHAKE_RUMBLE_STRONG_MAGNITUDE_MAX * strongPercent;
 	effect->u.rumble.weakMagnitude = SHAKE_RUMBLE_WEAK_MAGNITUDE_MAX * weakPercent;
-	effect->direction = 0x4000;
 	effect->length = 1000 * secs;
 	effect->delay = 0;
 }
@@ -21,7 +20,6 @@ void Shake_SimplePeriodic(Shake_Effect *effect, Shake_PeriodicWaveform waveform,
 	effect->u.periodic.envelope.attackLevel = 0;
 	effect->u.periodic.envelope.fadeLength = 1000 * fadeSecs;
 	effect->u.periodic.envelope.fadeLevel = 0;
-	effect->direction = 0x4000;
 	effect->length = 1000 * (sustainSecs + attackSecs + fadeSecs);
 	effect->delay = 0;
 }
