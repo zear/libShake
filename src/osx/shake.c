@@ -491,8 +491,8 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 		}
 
 		pf.dwMagnitude = convertMagnitude(effect->u.periodic.magnitude);
-		pf.lOffset = effect->u.periodic.offset;
-		pf.dwPhase = effect->u.periodic.phase;
+		pf.lOffset = convertMagnitude(effect->u.periodic.offset);
+		pf.dwPhase = ((float)effect->u.periodic.phase/SHAKE_PERIODIC_PHASE_MAX) * OSX_PERIODIC_PHASE_MAX;
 		pf.dwPeriod = effect->u.periodic.period * 1000;
 
 		e.lpEnvelope = malloc(sizeof(FFENVELOPE));
