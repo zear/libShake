@@ -11,15 +11,13 @@ Installation
 ### Linux
 
 ```shell
-BACKEND=LINUX make
-make install
+BACKEND=LINUX make install
 ```
 
 ### OSX
 
 ```shell
-BACKEND=OSX make
-make install
+BACKEND=OSX make install
 ```
 
 Authors
