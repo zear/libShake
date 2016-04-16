@@ -5,9 +5,22 @@ About
 -----
 libShake is a simple, cross-platform haptic library.
 
-Currently supported backends:
-* Linux
-* OS X
+Installation
+------------
+
+### Linux
+
+```shell
+BACKEND=LINUX make
+make install
+```
+
+### OSX
+
+```shell
+BACKEND=OSX make
+make install
+```
 
 Authors
 -------
