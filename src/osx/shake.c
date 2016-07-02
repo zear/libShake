@@ -25,6 +25,19 @@ int convertMagnitude(int magnitude)
 	return ((float)magnitude/0x7FFF) * FF_FFNOMINALMAX;
 }
 
+void itemDelete(void *item)
+{
+	Shake_Device *dev = (Shake_Device *)item;
+
+	if (!dev)
+		return;
+
+	Shake_Close(dev);
+	if (dev->service)
+		IOObjectRelease(dev->service);
+	free(dev);
+}
+
 /* Public functions */
 
 Shake_Status Shake_Init()
@@ -82,21 +95,7 @@ void Shake_Quit()
 {
 	if (listHead != NULL)
 	{
-		listElement *curElem = listHead;
-
-		while(curElem)
-		{
-			Shake_Device *dev;
-			listElement *toDelElem = curElem;
-			curElem = curElem->next;
-			dev = (Shake_Device *)toDelElem->item;
-
-			Shake_Close(dev);
-			if (dev->service)
-				IOObjectRelease(dev->service);
-		}
-
-		listElementDeleteAll(listHead);
+		listElementDeleteAll(listHead, itemDelete);
 	}
 }
 

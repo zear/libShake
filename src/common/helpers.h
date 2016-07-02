@@ -8,8 +8,8 @@ typedef struct listElement
 } listElement;
 
 listElement *listElementPrepend(listElement *head);
-listElement *listElementDelete(listElement *head, listElement *toDelNode);
-listElement *listElementDeleteAll(listElement *head);
+listElement *listElementDelete(listElement *head, listElement *toDelNode, void(*itemDel)());
+listElement *listElementDeleteAll(listElement *head, void(*itemDel)(void *item));
 listElement *listElementGet(listElement *head, unsigned int id);
 unsigned int listLength(listElement *head);
 

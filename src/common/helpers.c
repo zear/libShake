@@ -16,7 +16,7 @@ listElement *listElementPrepend(listElement *head)
 
 }
 
-listElement *listElementDelete(listElement *head, listElement *toDelNode)
+listElement *listElementDelete(listElement *head, listElement *toDelNode, void(*itemDel)(void *item))
 {
 	listElement *prevNode = NULL;
 	listElement *curNode = head;
@@ -34,7 +34,7 @@ listElement *listElementDelete(listElement *head, listElement *toDelNode)
 				prevNode->next = curNode->next;
 			}
 
-			free(curNode->item);
+			itemDel(curNode->item);
 			free(curNode);
 			return head;
 		}
@@ -45,7 +45,7 @@ listElement *listElementDelete(listElement *head, listElement *toDelNode)
 	return head;
 }
 
-listElement *listElementDeleteAll(listElement *head)
+listElement *listElementDeleteAll(listElement *head, void(*itemDel)())
 {
 	listElement *curNode = head;
 
@@ -53,7 +53,8 @@ listElement *listElementDeleteAll(listElement *head)
 	{
 		listElement *toDelNode = curNode;
 		curNode = curNode->next;
-		free(toDelNode->item);
+
+		itemDel(toDelNode->item);
 		free(toDelNode);
 	}
 
