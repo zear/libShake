@@ -74,6 +74,10 @@ Shake_Status Shake_Init()
 				memcpy(listHead->item, &dev, sizeof(Shake_Device));
 				++numOfDevices;
 			}
+			else
+			{
+				free(dev.node);
+			}
 
 			free(nameList[i]);
 		}

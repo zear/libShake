@@ -34,6 +34,7 @@ listElement *listElementDelete(listElement *head, listElement *toDelNode)
 				prevNode->next = curNode->next;
 			}
 
+			free(curNode->item);
 			free(curNode);
 			return head;
 		}
@@ -52,6 +53,7 @@ listElement *listElementDeleteAll(listElement *head)
 	{
 		listElement *toDelNode = curNode;
 		curNode = curNode->next;
+		free(toDelNode->item);
 		free(toDelNode);
 	}
 
