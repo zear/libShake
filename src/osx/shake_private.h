@@ -15,6 +15,13 @@
 
 #define OSX_PERIODIC_PHASE_MAX	0x8C9F
 
+typedef union TypeSpecificParams
+{
+	FFPERIODIC pf;
+	FFCONSTANTFORCE cf;
+	FFRAMPFORCE rf;
+} TypeSpecificParams;
+
 typedef struct effectContainer
 {
 	int id;
