@@ -400,19 +400,22 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	FFEFFECT e;
 	CFUUIDRef effectType;
 	effectContainer *container = NULL;
+	FFENVELOPE envelope;
+	TypeSpecificParams typeParams;
 	DWORD rgdwAxes[2];
 	LONG rglDirection[2];
 
-	if (!dev || !effect || effect->id < -1)
+	if (!dev || !effect || effect->id < SHAKE_EFFECT_ID_MIN)
 		return Shake_EmitErrorCode(SHAKE_EC_ARG);
 
 	rgdwAxes[0] = FFJOFS_X;
 	rgdwAxes[1] = FFJOFS_Y;
 	rglDirection[0] = effect->direction;
 	rglDirection[1] = 0;
+	memset(&envelope, 0, sizeof(FFENVELOPE));
 
 	/* Common parameters. */
-	memset(&e, 0, sizeof(e));
+	memset(&e, 0, sizeof(FFEFFECT));
 	e.dwSize = sizeof(FFEFFECT);
 	e.dwFlags = FFEFF_POLAR | FFEFF_OBJECTOFFSETS;
 	e.dwDuration = effect->length * 1000;
@@ -423,6 +426,8 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	e.dwStartDelay = effect->delay;
 	e.dwTriggerButton = FFEB_NOTRIGGER;
 	e.dwTriggerRepeatInterval = 0;
+	e.lpEnvelope = &envelope;
+	e.lpEnvelope->dwSize = sizeof(FFENVELOPE);
 
 	e.dwGain = FF_FFNOMINALMAX;
 
@@ -431,7 +436,6 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	{
 		/* Emulate EFFECT_RUMBLE with EFFECT_PERIODIC. */
 		int magnitude;
-		FFPERIODIC pf;
 
 		/*
 		 * The magnitude is calculated as average of
@@ -445,26 +449,22 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 			magnitude = SHAKE_PERIODIC_MAGNITUDE_MAX;
 		}
 
-		pf.dwMagnitude = convertMagnitude(magnitude);
-		pf.lOffset = 0;
-		pf.dwPhase = 0;
-		pf.dwPeriod = 50 * 1000; /* Magic number from the Linux kernel implementation. */
+		typeParams.pf.dwMagnitude = convertMagnitude(magnitude);
+		typeParams.pf.lOffset = 0;
+		typeParams.pf.dwPhase = 0;
+		typeParams.pf.dwPeriod = 50 * 1000; /* Magic number from the Linux kernel implementation. */
 
 		effectType = kFFEffectType_Sine_ID;
-		e.lpEnvelope = malloc(sizeof(FFENVELOPE));
-		e.lpEnvelope->dwSize = sizeof(FFENVELOPE);
 		e.lpEnvelope->dwAttackTime = 0;
 		e.lpEnvelope->dwAttackLevel = 0;
 		e.lpEnvelope->dwFadeTime = 0;
 		e.lpEnvelope->dwFadeLevel = 0;
 
 		e.cbTypeSpecificParams = sizeof(FFPERIODIC);
-		e.lpvTypeSpecificParams = &pf;
+		e.lpvTypeSpecificParams = &typeParams.pf;
 	}
 	else if(effect->type == SHAKE_EFFECT_PERIODIC)
 	{
-		FFPERIODIC pf;
-
 		switch (effect->u.periodic.waveform)
 		{
 			case SHAKE_PERIODIC_SQUARE:
@@ -490,62 +490,52 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 			return Shake_EmitErrorCode(SHAKE_EC_SUPPORT);
 		}
 
-		pf.dwMagnitude = convertMagnitude(effect->u.periodic.magnitude);
-		pf.lOffset = convertMagnitude(effect->u.periodic.offset);
-		pf.dwPhase = ((float)effect->u.periodic.phase/SHAKE_PERIODIC_PHASE_MAX) * OSX_PERIODIC_PHASE_MAX;
-		pf.dwPeriod = effect->u.periodic.period * 1000;
+		typeParams.pf.dwMagnitude = convertMagnitude(effect->u.periodic.magnitude);
+		typeParams.pf.lOffset = convertMagnitude(effect->u.periodic.offset);
+		typeParams.pf.dwPhase = ((float)effect->u.periodic.phase/SHAKE_PERIODIC_PHASE_MAX) * OSX_PERIODIC_PHASE_MAX;
+		typeParams.pf.dwPeriod = effect->u.periodic.period * 1000;
 
-		e.lpEnvelope = malloc(sizeof(FFENVELOPE));
-		e.lpEnvelope->dwSize = sizeof(FFENVELOPE);
 		e.lpEnvelope->dwAttackTime = effect->u.periodic.envelope.attackLength * 1000;
 		e.lpEnvelope->dwAttackLevel = effect->u.periodic.envelope.attackLevel;
 		e.lpEnvelope->dwFadeTime = effect->u.periodic.envelope.fadeLength * 1000;
 		e.lpEnvelope->dwFadeLevel = effect->u.periodic.envelope.fadeLevel;
 
 		e.cbTypeSpecificParams = sizeof(FFPERIODIC);
-		e.lpvTypeSpecificParams = &pf;
+		e.lpvTypeSpecificParams = &typeParams.pf;
 	}
 	else if(effect->type == SHAKE_EFFECT_CONSTANT)
 	{
-		FFCONSTANTFORCE cf;
-
-		cf.lMagnitude = convertMagnitude(effect->u.constant.level);
+		typeParams.cf.lMagnitude = convertMagnitude(effect->u.constant.level);
 
 		effectType = kFFEffectType_ConstantForce_ID;
-		e.lpEnvelope = malloc(sizeof(FFENVELOPE));
-		e.lpEnvelope->dwSize = sizeof(FFENVELOPE);
 		e.lpEnvelope->dwAttackTime = effect->u.constant.envelope.attackLength * 1000;
 		e.lpEnvelope->dwAttackLevel = effect->u.constant.envelope.attackLevel;
 		e.lpEnvelope->dwFadeTime = effect->u.constant.envelope.fadeLength * 1000;
 		e.lpEnvelope->dwFadeLevel = effect->u.constant.envelope.fadeLevel;
 
 		e.cbTypeSpecificParams = sizeof(FFCONSTANTFORCE);
-		e.lpvTypeSpecificParams = &cf;
+		e.lpvTypeSpecificParams = &typeParams.cf;
 	}
 	else if(effect->type == SHAKE_EFFECT_RAMP)
 	{
-		FFRAMPFORCE rf;
-
-		rf.lStart = ((float)effect->u.ramp.startLevel/SHAKE_RAMP_START_LEVEL_MAX) * FF_FFNOMINALMAX;
-		rf.lEnd = ((float)effect->u.ramp.endLevel/SHAKE_RAMP_END_LEVEL_MAX) * FF_FFNOMINALMAX;
+		typeParams.rf.lStart = ((float)effect->u.ramp.startLevel/SHAKE_RAMP_START_LEVEL_MAX) * FF_FFNOMINALMAX;
+		typeParams.rf.lEnd = ((float)effect->u.ramp.endLevel/SHAKE_RAMP_END_LEVEL_MAX) * FF_FFNOMINALMAX;
 
 		effectType = kFFEffectType_RampForce_ID;
-		e.lpEnvelope = malloc(sizeof(FFENVELOPE));
-		e.lpEnvelope->dwSize = sizeof(FFENVELOPE);
 		e.lpEnvelope->dwAttackTime = effect->u.ramp.envelope.attackLength * 1000;
 		e.lpEnvelope->dwAttackLevel = effect->u.ramp.envelope.attackLevel;
 		e.lpEnvelope->dwFadeTime = effect->u.ramp.envelope.fadeLength * 1000;
 		e.lpEnvelope->dwFadeLevel = effect->u.ramp.envelope.fadeLevel;
 
 		e.cbTypeSpecificParams = sizeof(FFRAMPFORCE);
-		e.lpvTypeSpecificParams = &rf;
+		e.lpvTypeSpecificParams = &typeParams.rf;
 	}
 	else
 	{
 		return (effect->type >= SHAKE_EFFECT_COUNT ? Shake_EmitErrorCode(SHAKE_EC_ARG) : Shake_EmitErrorCode(SHAKE_EC_SUPPORT));
 	}
 
-	if (effect->id == -1) /* Create a new effect. */
+	if (effect->id == SHAKE_EFFECT_ID_MIN) /* Create a new effect. */
 	{
 		dev->effectList = listElementPrepend(dev->effectList);
 		dev->effectList->item = malloc(sizeof(effectContainer));
@@ -557,7 +547,6 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 
 		if ((unsigned int)result != FF_OK)
 		{
-			free(e.lpEnvelope);
 			dev->effectList = listElementDelete(dev->effectList, dev->effectList);
 			return Shake_EmitErrorCode(SHAKE_EC_TRANSFER);
 		}
@@ -586,14 +575,9 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 			result = FFEffectSetParameters(container->effect, &e, flags);
 
 			if ((unsigned int)result != FF_OK)
-			{
-				free(e.lpEnvelope);
 				return Shake_EmitErrorCode(SHAKE_EC_TRANSFER);
-			}
 		}
 	}
-
-	free(e.lpEnvelope);
 
 	return container ? container->id : Shake_EmitErrorCode(SHAKE_EC_EFFECT);
 }
