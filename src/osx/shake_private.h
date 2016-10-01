@@ -43,6 +43,7 @@ struct Shake_Device
 extern listElement *listHead;
 extern unsigned int numOfDevices;
 
-void itemDelete(void *item);
+void devItemDelete(void *item);
+void effectItemDelete(void *item);
 
 #endif /* _SHAKE_PRIVATE_H_ */

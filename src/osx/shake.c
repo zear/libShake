@@ -25,7 +25,7 @@ int convertMagnitude(int magnitude)
 	return ((float)magnitude/0x7FFF) * FF_FFNOMINALMAX;
 }
 
-void itemDelete(void *item)
+void devItemDelete(void *item)
 {
 	Shake_Device *dev = (Shake_Device *)item;
 
@@ -37,6 +37,13 @@ void itemDelete(void *item)
 		IOObjectRelease(dev->service);
 	free(dev);
 }
+
+void effectItemDelete(void *item)
+{
+	effectContainer *effect = (effectContainer *)item;
+	free(effect);
+}
+
 
 /* Public functions */
 
@@ -95,7 +102,7 @@ void Shake_Quit()
 {
 	if (listHead != NULL)
 	{
-		listElementDeleteAll(listHead, itemDelete);
+		listElementDeleteAll(listHead, devItemDelete);
 	}
 }
 
@@ -546,7 +553,7 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 
 		if ((unsigned int)result != FF_OK)
 		{
-			dev->effectList = listElementDelete(dev->effectList, dev->effectList);
+			dev->effectList = listElementDelete(dev->effectList, dev->effectList, effectItemDelete);
 			return Shake_EmitErrorCode(SHAKE_EC_TRANSFER);
 		}
 	}
@@ -612,7 +619,7 @@ Shake_Status Shake_EraseEffect(Shake_Device *dev, int id)
 		return Shake_EmitErrorCode(SHAKE_EC_TRANSFER);
 	}
 
-	dev->effectList = listElementDelete(dev->effectList, node);
+	dev->effectList = listElementDelete(dev->effectList, node, effectItemDelete);
 
 	return SHAKE_OK;
 }
@@ -706,7 +713,7 @@ Shake_Status Shake_Close(Shake_Device *dev)
 		}
 	}
 
-	dev->effectList = listElementDeleteAll(dev->effectList);
+	dev->effectList = listElementDeleteAll(dev->effectList, effectItemDelete);
 	if (FFReleaseDevice(dev->device) != FF_OK)
 	{
 		return Shake_EmitErrorCode(SHAKE_EC_TRANSFER);
