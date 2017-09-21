@@ -36,7 +36,7 @@ struct Shake_Device
 	/* Platform dependent section */
 	io_service_t service;
 	FFDeviceObjectReference device;
-	listElement *effectList;
+	ListElement *effectList;
 	FFCAPABILITIES features;
 };
 
