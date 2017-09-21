@@ -11,21 +11,15 @@
 #include "../common/helpers.h"
 #include "../common/error.h"
 
-ListElement *listHead;
-unsigned int numOfDevices;
+static ListElement *listHead;
+static unsigned int numOfDevices;
 
-/* Prototypes */
-
-Shake_Status Shake_Probe(Shake_Device *dev);
-Shake_Status Shake_Query(Shake_Device *dev);
-int convertMagnitude(int magnitude);
-
-int convertMagnitude(int magnitude)
+static int convertMagnitude(int magnitude)
 {
 	return ((float)magnitude/0x7FFF) * FF_FFNOMINALMAX;
 }
 
-void devItemDelete(void *item)
+static void devItemDelete(void *item)
 {
 	Shake_Device *dev = (Shake_Device *)item;
 
@@ -38,127 +32,13 @@ void devItemDelete(void *item)
 	free(dev);
 }
 
-void effectItemDelete(void *item)
+static void effectItemDelete(void *item)
 {
 	EffectContainer *effect = (EffectContainer *)item;
 	free(effect);
 }
 
-
-/* Public functions */
-
-Shake_Status Shake_Init()
-{
-	IOReturn ret;
-	io_iterator_t iter;
-	CFDictionaryRef match;
-	io_service_t device;
-
-	match = IOServiceMatching(kIOHIDDeviceKey);
-
-	if (!match)
-	{
-		return Shake_EmitErrorCode(SHAKE_EC_DEVICE);
-	}
-
-	ret = IOServiceGetMatchingServices(kIOMasterPortDefault, match, &iter);
-
-	if (ret != kIOReturnSuccess)
-	{
-		return Shake_EmitErrorCode(SHAKE_EC_DEVICE);
-	}
-
-	if (!IOIteratorIsValid(iter))
-	{
-		return Shake_EmitErrorCode(SHAKE_EC_DEVICE);
-	}
-
-	while ((device = IOIteratorNext(iter)) != IO_OBJECT_NULL)
-	{
-		Shake_Device dev;
-		dev.service = device;
-		dev.effectList = NULL;
-
-		if (Shake_Probe(&dev) == SHAKE_OK)
-		{
-			dev.id = numOfDevices;
-			listHead = listElementPrepend(listHead);
-			listHead->item = malloc(sizeof(Shake_Device));
-			memcpy(listHead->item, &dev, sizeof(Shake_Device));
-			++numOfDevices;
-		}
-		else
-		{
-			IOObjectRelease(device);
-		}
-	}
-
-	IOObjectRelease(iter);
-
-	return SHAKE_OK;
-}
-
-void Shake_Quit()
-{
-	if (listHead != NULL)
-	{
-		listElementDeleteAll(listHead, devItemDelete);
-	}
-}
-
-int Shake_NumOfDevices()
-{
-	return numOfDevices;
-}
-
-Shake_Status Shake_Probe(Shake_Device *dev)
-{
-	if ((FFIsForceFeedback(dev->service)) != FF_OK)
-	{
-		return SHAKE_ERROR;
-	}
-
-	if (Shake_Query(dev))
-	{
-		return SHAKE_ERROR;
-	}
-
-	return SHAKE_OK;
-}
-
-Shake_Device *Shake_Open(unsigned int id)
-{
-	HRESULT result;
-	Shake_Device *dev;
-	ListElement *element;
-
-	if (id >= numOfDevices)
-	{
-		Shake_EmitErrorCode(SHAKE_EC_ARG);
-		return NULL;
-	}
-
-	element = listElementGet(listHead, numOfDevices - 1 - id);
-	dev = (Shake_Device *)element->item;
-
-	if(!dev || !dev->service)
-	{
-		Shake_EmitErrorCode(SHAKE_EC_DEVICE);
-		return NULL;
-	}
-
-	result = FFCreateDevice(dev->service, &dev->device);
-
-	if (result != FF_OK)
-	{
-		Shake_EmitErrorCode(SHAKE_EC_DEVICE);
-		return NULL;
-	}
-
-	return dev;
-}
-
-Shake_Status Shake_Query(Shake_Device *dev)
+static Shake_Status query(Shake_Device *dev)
 {
 	HRESULT result;
 	io_name_t deviceName;
@@ -206,6 +86,119 @@ Shake_Status Shake_Query(Shake_Device *dev)
 	}
 
 	return SHAKE_OK;
+}
+
+static Shake_Status probe(Shake_Device *dev)
+{
+	if ((FFIsForceFeedback(dev->service)) != FF_OK)
+	{
+		return SHAKE_ERROR;
+	}
+
+	if (query(dev))
+	{
+		return SHAKE_ERROR;
+	}
+
+	return SHAKE_OK;
+}
+
+/* API implementation. */
+
+Shake_Status Shake_Init()
+{
+	IOReturn ret;
+	io_iterator_t iter;
+	CFDictionaryRef match;
+	io_service_t device;
+
+	match = IOServiceMatching(kIOHIDDeviceKey);
+
+	if (!match)
+	{
+		return Shake_EmitErrorCode(SHAKE_EC_DEVICE);
+	}
+
+	ret = IOServiceGetMatchingServices(kIOMasterPortDefault, match, &iter);
+
+	if (ret != kIOReturnSuccess)
+	{
+		return Shake_EmitErrorCode(SHAKE_EC_DEVICE);
+	}
+
+	if (!IOIteratorIsValid(iter))
+	{
+		return Shake_EmitErrorCode(SHAKE_EC_DEVICE);
+	}
+
+	while ((device = IOIteratorNext(iter)) != IO_OBJECT_NULL)
+	{
+		Shake_Device dev;
+		dev.service = device;
+		dev.effectList = NULL;
+
+		if (probe(&dev) == SHAKE_OK)
+		{
+			dev.id = numOfDevices;
+			listHead = listElementPrepend(listHead);
+			listHead->item = malloc(sizeof(Shake_Device));
+			memcpy(listHead->item, &dev, sizeof(Shake_Device));
+			++numOfDevices;
+		}
+		else
+		{
+			IOObjectRelease(device);
+		}
+	}
+
+	IOObjectRelease(iter);
+
+	return SHAKE_OK;
+}
+
+void Shake_Quit()
+{
+	if (listHead != NULL)
+	{
+		listElementDeleteAll(listHead, devItemDelete);
+	}
+}
+
+int Shake_NumOfDevices()
+{
+	return numOfDevices;
+}
+
+Shake_Device *Shake_Open(unsigned int id)
+{
+	HRESULT result;
+	Shake_Device *dev;
+	ListElement *element;
+
+	if (id >= numOfDevices)
+	{
+		Shake_EmitErrorCode(SHAKE_EC_ARG);
+		return NULL;
+	}
+
+	element = listElementGet(listHead, numOfDevices - 1 - id);
+	dev = (Shake_Device *)element->item;
+
+	if(!dev || !dev->service)
+	{
+		Shake_EmitErrorCode(SHAKE_EC_DEVICE);
+		return NULL;
+	}
+
+	result = FFCreateDevice(dev->service, &dev->device);
+
+	if (result != FF_OK)
+	{
+		Shake_EmitErrorCode(SHAKE_EC_DEVICE);
+		return NULL;
+	}
+
+	return dev;
 }
 
 int Shake_DeviceId(Shake_Device *dev)

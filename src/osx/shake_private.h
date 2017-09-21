@@ -40,10 +40,4 @@ struct Shake_Device
 	FFCAPABILITIES features;
 };
 
-extern ListElement *listHead;
-extern unsigned int numOfDevices;
-
-void devItemDelete(void *item);
-void effectItemDelete(void *item);
-
 #endif /* _SHAKE_PRIVATE_H_ */
