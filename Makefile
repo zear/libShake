@@ -40,7 +40,7 @@ SRC          := $(foreach dir,$(SRCDIRS),$(sort $(wildcard $(addprefix $(SRCDIR)
 OBJ          := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRC))
 
 ifdef DEBUG
-  CFLAGS += -ggdb -Wall -Werror -pedantic -std=c99
+  CFLAGS += -ggdb -Wall -Werror -pedantic -std=c89
 else
   CFLAGS += -O2
 endif

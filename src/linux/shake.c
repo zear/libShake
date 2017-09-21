@@ -137,6 +137,7 @@ Shake_Status Shake_Probe(Shake_Device *dev)
 Shake_Device *Shake_Open(unsigned int id)
 {
 	Shake_Device *dev;
+	listElement *element;
 
 	if (id >= numOfDevices)
 	{
@@ -144,7 +145,7 @@ Shake_Device *Shake_Open(unsigned int id)
 		return NULL;
 	}
 
-	listElement *element = listElementGet(listHead, numOfDevices - 1 - id);
+	element = listElementGet(listHead, numOfDevices - 1 - id);
 	dev = (Shake_Device *)element->item;
 
 	if(!dev || !dev->node)
@@ -380,10 +381,10 @@ Shake_Status Shake_EraseEffect(Shake_Device *dev, int id)
 
 Shake_Status Shake_Play(Shake_Device *dev, int id)
 {
+	struct input_event play;
 	if (!dev || id < 0)
 		return Shake_EmitErrorCode(SHAKE_EC_ARG);
 
-	struct input_event play;
 	play.type = EV_FF;
 	play.code = id; /* the id we got when uploading the effect */
 	play.value = FF_STATUS_PLAYING; /* play: FF_STATUS_PLAYING, stop: FF_STATUS_STOPPED */
@@ -396,10 +397,10 @@ Shake_Status Shake_Play(Shake_Device *dev, int id)
 
 Shake_Status Shake_Stop(Shake_Device *dev, int id)
 {
+	struct input_event stop;
 	if (!dev || id < 0)
 		return Shake_EmitErrorCode(SHAKE_EC_ARG);
 
-	struct input_event stop;
 	stop.type = EV_FF;
 	stop.code = id; /* the id we got when uploading the effect */
 	stop.value = FF_STATUS_STOPPED;

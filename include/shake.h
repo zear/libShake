@@ -164,7 +164,7 @@ extern "C" {
 typedef enum Shake_Status
 {
 	SHAKE_ERROR	= -1,		/**< Error. */
-	SHAKE_OK	= 0,		/**< Success. */
+	SHAKE_OK	= 0		/**< Success. */
 } Shake_Status;
 
 /** \enum Shake_Bool
