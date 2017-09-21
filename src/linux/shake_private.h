@@ -27,10 +27,4 @@ struct Shake_Device
 
 };
 
-extern ListElement *listHead;
-extern unsigned int numOfDevices;
-
-int nameFilter(const struct dirent *entry);
-void itemDelete(void *item);
-
 #endif /* _SHAKE_PRIVATE_H_ */

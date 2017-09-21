@@ -19,21 +19,16 @@
 
 #define SHAKE_TEST(x) ((x) ? SHAKE_TRUE : SHAKE_FALSE)
 
-ListElement *listHead;
-unsigned int numOfDevices;
+static ListElement *listHead;
+static unsigned int numOfDevices;
 
-/* Prototypes */
-
-int Shake_Probe(Shake_Device *dev);
-int Shake_Query(Shake_Device *dev);
-
-int nameFilter(const struct dirent *entry)
+static int nameFilter(const struct dirent *entry)
 {
 	const char filter[] = "event";
 	return !strncmp(filter, entry->d_name, strlen(filter));
 }
 
-void itemDelete(void *item)
+static void itemDelete(void *item)
 {
 	Shake_Device *dev = (Shake_Device *)item;
 
@@ -46,7 +41,61 @@ void itemDelete(void *item)
 	free(dev);
 }
 
-/* Public functions */
+static Shake_Status query(Shake_Device *dev)
+{
+	int size = sizeof(dev->features)/sizeof(unsigned long);
+	int i;
+
+	if(!dev)
+		return Shake_EmitErrorCode(SHAKE_EC_ARG);
+
+	if (ioctl(dev->fd, EVIOCGBIT(EV_FF, sizeof(dev->features)), dev->features) == -1)
+		return Shake_EmitErrorCode(SHAKE_EC_QUERY);
+
+	for (i = 0; i < size; ++i)
+	{
+		if (dev->features[i])
+			break;
+	}
+
+	if (i >= size) /* Device doesn't support any force feedback effects. Ignore it. */
+		return Shake_EmitErrorCode(SHAKE_EC_DEVICE);
+
+	if (ioctl(dev->fd, EVIOCGEFFECTS, &dev->capacity) == -1)
+		return Shake_EmitErrorCode(SHAKE_EC_QUERY);
+
+	if (dev->capacity <= 0) /* Device doesn't support uploading effects. Ignore it. */
+		return Shake_EmitErrorCode(SHAKE_EC_DEVICE);
+
+	if (ioctl(dev->fd, EVIOCGNAME(sizeof(dev->name)), dev->name) == -1) /* Get device name */
+	{
+		strncpy(dev->name, "Unknown", sizeof(dev->name));
+	}
+
+	return SHAKE_OK;
+}
+
+static Shake_Status probe(Shake_Device *dev)
+{
+	int isHaptic;
+
+	if(!dev)
+		return Shake_EmitErrorCode(SHAKE_EC_ARG);
+	if (!dev->node)
+		return Shake_EmitErrorCode(SHAKE_EC_DEVICE);
+
+	dev->fd = open(dev->node, O_RDWR);
+
+	if (!dev->fd)
+		return SHAKE_ERROR;
+
+	isHaptic = !query(dev);
+	dev->fd = close(dev->fd);
+
+	return isHaptic ? SHAKE_OK : SHAKE_ERROR;
+}
+
+/* API implementation. */
 
 Shake_Status Shake_Init()
 {
@@ -79,7 +128,7 @@ Shake_Status Shake_Init()
 			strcat(dev.node, "/");
 			strcat(dev.node, nameList[i]->d_name);
 
-			if (Shake_Probe(&dev) == SHAKE_OK)
+			if (probe(&dev) == SHAKE_OK)
 			{
 				dev.id = numOfDevices;
 				listHead = listElementPrepend(listHead);
@@ -114,26 +163,6 @@ int Shake_NumOfDevices()
 	return numOfDevices;
 }
 
-Shake_Status Shake_Probe(Shake_Device *dev)
-{
-	int isHaptic;
-
-	if(!dev)
-		return Shake_EmitErrorCode(SHAKE_EC_ARG);
-	if (!dev->node)
-		return Shake_EmitErrorCode(SHAKE_EC_DEVICE);
-
-	dev->fd = open(dev->node, O_RDWR);
-
-	if (!dev->fd)
-		return SHAKE_ERROR;
-
-	isHaptic = !Shake_Query(dev);
-	dev->fd = close(dev->fd);
-	
-	return isHaptic ? SHAKE_OK : SHAKE_ERROR;
-}
-
 Shake_Device *Shake_Open(unsigned int id)
 {
 	Shake_Device *dev;
@@ -159,40 +188,6 @@ Shake_Device *Shake_Open(unsigned int id)
 		Shake_EmitErrorCode(SHAKE_EC_DEVICE);
 
 	return dev->fd ? dev : NULL;
-}
-
-Shake_Status Shake_Query(Shake_Device *dev)
-{
-	int size = sizeof(dev->features)/sizeof(unsigned long);
-	int i;
-
-	if(!dev)
-		return Shake_EmitErrorCode(SHAKE_EC_ARG);
-
-	if (ioctl(dev->fd, EVIOCGBIT(EV_FF, sizeof(dev->features)), dev->features) == -1)
-		return Shake_EmitErrorCode(SHAKE_EC_QUERY);
-
-	for (i = 0; i < size; ++i)
-	{
-		if (dev->features[i])
-			break;
-	}
-
-	if (i >= size) /* Device doesn't support any force feedback effects. Ignore it. */
-		return Shake_EmitErrorCode(SHAKE_EC_DEVICE);
-
-	if (ioctl(dev->fd, EVIOCGEFFECTS, &dev->capacity) == -1)
-		return Shake_EmitErrorCode(SHAKE_EC_QUERY);
-
-	if (dev->capacity <= 0) /* Device doesn't support uploading effects. Ignore it. */
-		return Shake_EmitErrorCode(SHAKE_EC_DEVICE);
-
-	if (ioctl(dev->fd, EVIOCGNAME(sizeof(dev->name)), dev->name) == -1) /* Get device name */
-	{
-		strncpy(dev->name, "Unknown", sizeof(dev->name));
-	}
-
-	return SHAKE_OK;
 }
 
 int Shake_DeviceId(Shake_Device *dev)
