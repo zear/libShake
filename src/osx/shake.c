@@ -130,6 +130,7 @@ Shake_Device *Shake_Open(unsigned int id)
 {
 	HRESULT result;
 	Shake_Device *dev;
+	ListElement *element;
 
 	if (id >= numOfDevices)
 	{
@@ -137,7 +138,7 @@ Shake_Device *Shake_Open(unsigned int id)
 		return NULL;
 	}
 
-	ListElement *element = listElementGet(listHead, numOfDevices - 1 - id);
+	element = listElementGet(listHead, numOfDevices - 1 - id);
 	dev = (Shake_Device *)element->item;
 
 	if(!dev || !dev->service)
