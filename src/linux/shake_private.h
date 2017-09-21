@@ -27,7 +27,7 @@ struct Shake_Device
 
 };
 
-extern listElement *listHead;
+extern ListElement *listHead;
 extern unsigned int numOfDevices;
 
 int nameFilter(const struct dirent *entry);

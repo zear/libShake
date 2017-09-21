@@ -22,11 +22,11 @@ typedef union TypeSpecificParams
 	FFRAMPFORCE rf;
 } TypeSpecificParams;
 
-typedef struct effectContainer
+typedef struct EffectContainer
 {
 	int id;
 	FFEffectObjectReference effect;
-} effectContainer;
+} EffectContainer;
 
 struct Shake_Device
 {
@@ -40,7 +40,7 @@ struct Shake_Device
 	FFCAPABILITIES features;
 };
 
-extern listElement *listHead;
+extern ListElement *listHead;
 extern unsigned int numOfDevices;
 
 void devItemDelete(void *item);

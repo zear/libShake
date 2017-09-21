@@ -11,7 +11,7 @@
 #include "../common/helpers.h"
 #include "../common/error.h"
 
-listElement *listHead;
+ListElement *listHead;
 unsigned int numOfDevices;
 
 /* Prototypes */
@@ -40,7 +40,7 @@ void devItemDelete(void *item)
 
 void effectItemDelete(void *item)
 {
-	effectContainer *effect = (effectContainer *)item;
+	EffectContainer *effect = (EffectContainer *)item;
 	free(effect);
 }
 
@@ -137,7 +137,7 @@ Shake_Device *Shake_Open(unsigned int id)
 		return NULL;
 	}
 
-	listElement *element = listElementGet(listHead, numOfDevices - 1 - id);
+	ListElement *element = listElementGet(listHead, numOfDevices - 1 - id);
 	dev = (Shake_Device *)element->item;
 
 	if(!dev || !dev->service)
@@ -405,7 +405,7 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	HRESULT result;
 	FFEFFECT e;
 	CFUUIDRef effectType;
-	effectContainer *container = NULL;
+	EffectContainer *container = NULL;
 	FFENVELOPE envelope;
 	TypeSpecificParams typeParams;
 	DWORD rgdwAxes[2];
@@ -544,7 +544,7 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	if (effect->id == SHAKE_EFFECT_ID_MIN) /* Create a new effect. */
 	{
 		dev->effectList = listElementPrepend(dev->effectList);
-		dev->effectList->item = malloc(sizeof(effectContainer));
+		dev->effectList->item = malloc(sizeof(EffectContainer));
 		container = dev->effectList->item;
 		container->id = listLength(dev->effectList) - 1;
 		container->effect = 0;
@@ -559,12 +559,12 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 	}
 	else /* Update existing effect. */
 	{
-		listElement *node = dev->effectList;
-		effectContainer *item;
+		ListElement *node = dev->effectList;
+		EffectContainer *item;
 
 		while (node)
 		{
-			item = (effectContainer *)node->item;
+			item = (EffectContainer *)node->item;
 			if (item->id == effect->id)
 			{
 				container = item;
@@ -590,8 +590,8 @@ int Shake_UploadEffect(Shake_Device *dev, Shake_Effect *effect)
 
 Shake_Status Shake_EraseEffect(Shake_Device *dev, int id)
 {
-	listElement *node;
-	effectContainer *effect = NULL;
+	ListElement *node;
+	EffectContainer *effect = NULL;
 
 	if(!dev || id < 0)
 		return Shake_EmitErrorCode(SHAKE_EC_ARG);
@@ -600,7 +600,7 @@ Shake_Status Shake_EraseEffect(Shake_Device *dev, int id)
 
 	while (node)
 	{
-		effect = (effectContainer *)node->item;
+		effect = (EffectContainer *)node->item;
 		if (effect->id == id)
 		{
 			break;
@@ -626,8 +626,8 @@ Shake_Status Shake_EraseEffect(Shake_Device *dev, int id)
 
 Shake_Status Shake_Play(Shake_Device *dev, int id)
 {
-	listElement *node;
-	effectContainer *effect = NULL;
+	ListElement *node;
+	EffectContainer *effect = NULL;
 
 	if(!dev || id < 0)
 		return Shake_EmitErrorCode(SHAKE_EC_ARG);
@@ -636,7 +636,7 @@ Shake_Status Shake_Play(Shake_Device *dev, int id)
 
 	while (node)
 	{
-		effect = (effectContainer *)node->item;
+		effect = (EffectContainer *)node->item;
 		if (effect->id == id)
 		{
 			break;
@@ -660,8 +660,8 @@ Shake_Status Shake_Play(Shake_Device *dev, int id)
 
 Shake_Status Shake_Stop(Shake_Device *dev, int id)
 {
-	listElement *node;
-	effectContainer *effect = NULL;
+	ListElement *node;
+	EffectContainer *effect = NULL;
 
 	if(!dev || id < 0)
 		return Shake_EmitErrorCode(SHAKE_EC_ARG);
@@ -670,7 +670,7 @@ Shake_Status Shake_Stop(Shake_Device *dev, int id)
 
 	while (node)
 	{
-		effect = (effectContainer *)node->item;
+		effect = (EffectContainer *)node->item;
 		if (effect->id == id)
 		{
 			break;
@@ -706,7 +706,7 @@ Shake_Status Shake_Close(Shake_Device *dev)
 
 	for (i = 0; i < effectLen; ++i)
 	{
-		effectContainer *effect = (effectContainer *)listElementGet(dev->effectList, i);
+		EffectContainer *effect = (EffectContainer *)listElementGet(dev->effectList, i);
 		if (FFDeviceReleaseEffect(dev->device, effect->effect))
 		{
 			return Shake_EmitErrorCode(SHAKE_EC_TRANSFER);

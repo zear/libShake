@@ -19,7 +19,7 @@
 
 #define SHAKE_TEST(x) ((x) ? SHAKE_TRUE : SHAKE_FALSE)
 
-listElement *listHead;
+ListElement *listHead;
 unsigned int numOfDevices;
 
 /* Prototypes */
@@ -137,7 +137,7 @@ Shake_Status Shake_Probe(Shake_Device *dev)
 Shake_Device *Shake_Open(unsigned int id)
 {
 	Shake_Device *dev;
-	listElement *element;
+	ListElement *element;
 
 	if (id >= numOfDevices)
 	{

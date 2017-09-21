@@ -11,7 +11,7 @@ CFLAGS       := -fPIC -I../include
 SRCDIR       := .
 
 ifdef DEBUG
-  CFLAGS += -ggdb -Wall -Werror -pedantic -std=c99
+  CFLAGS += -ggdb -Wall -Werror -pedantic -std=c89
 else
   CFLAGS += -O2
 endif

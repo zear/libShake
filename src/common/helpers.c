@@ -3,9 +3,9 @@
 
 /* Linked list */
 
-listElement *listElementPrepend(listElement *head)
+ListElement *listElementPrepend(ListElement *head)
 {
-	listElement *newNode = malloc(sizeof(listElement));
+	ListElement *newNode = malloc(sizeof(ListElement));
 	if(!newNode)
 	{
 		return head;
@@ -16,10 +16,10 @@ listElement *listElementPrepend(listElement *head)
 
 }
 
-listElement *listElementDelete(listElement *head, listElement *toDelNode, void(*itemDel)(void *item))
+ListElement *listElementDelete(ListElement *head, ListElement *toDelNode, void(*itemDel)(void *item))
 {
-	listElement *prevNode = NULL;
-	listElement *curNode = head;
+	ListElement *prevNode = NULL;
+	ListElement *curNode = head;
 
 	while(curNode)
 	{
@@ -45,13 +45,13 @@ listElement *listElementDelete(listElement *head, listElement *toDelNode, void(*
 	return head;
 }
 
-listElement *listElementDeleteAll(listElement *head, void(*itemDel)())
+ListElement *listElementDeleteAll(ListElement *head, void(*itemDel)())
 {
-	listElement *curNode = head;
+	ListElement *curNode = head;
 
 	while(curNode)
 	{
-		listElement *toDelNode = curNode;
+		ListElement *toDelNode = curNode;
 		curNode = curNode->next;
 
 		itemDel(toDelNode->item);
@@ -61,9 +61,9 @@ listElement *listElementDeleteAll(listElement *head, void(*itemDel)())
 	return NULL;
 }
 
-listElement *listElementGet(listElement *head, unsigned int id)
+ListElement *listElementGet(ListElement *head, unsigned int id)
 {
-	listElement *curNode = head;
+	ListElement *curNode = head;
 	int i = 0;
 
 	while(curNode)
@@ -78,9 +78,9 @@ listElement *listElementGet(listElement *head, unsigned int id)
 	return NULL;
 }
 
-unsigned int listLength(listElement *head)
+unsigned int listLength(ListElement *head)
 {
-	listElement *curNode = head;
+	ListElement *curNode = head;
 	unsigned int count = 0;
 
 	while (curNode)
