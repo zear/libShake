@@ -305,19 +305,19 @@ typedef struct Shake_Effect
     \return On success, SHAKE_OK is returned.
     \return On error, SHAKE_ERROR is returned.
 */
-Shake_Status Shake_Init();
+Shake_Status Shake_Init(void);
 
 /** \fn void Shake_Quit()
     \brief Uninitializes libShake.
 */
-void Shake_Quit();
+void Shake_Quit(void);
 
 /** \fn int Shake_NumOfDevices()
     \brief Lists the number of haptic devices.
     \return On success, number of devices is returned.
     \return On error, SHAKE_ERROR is returned.
 */
-int Shake_NumOfDevices();
+int Shake_NumOfDevices(void);
 
 /** \fn Shake_Device *Shake_Open(unsigned int id)
     \brief Opens a Shake device.
@@ -513,7 +513,7 @@ void Shake_SimpleRamp(Shake_Effect *effect, float startForcePercent, float endFo
     \brief Informs about the error type.
     \return Error code reflecting the last error type.
 */
-Shake_ErrorCode Shake_GetErrorCode();
+Shake_ErrorCode Shake_GetErrorCode(void);
 
 #ifdef __cplusplus
 }

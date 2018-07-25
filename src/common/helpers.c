@@ -45,7 +45,7 @@ ListElement *listElementDelete(ListElement *head, ListElement *toDelNode, void(*
 	return head;
 }
 
-ListElement *listElementDeleteAll(ListElement *head, void(*itemDel)())
+ListElement *listElementDeleteAll(ListElement *head, void(*itemDel)(void *item))
 {
 	ListElement *curNode = head;
 

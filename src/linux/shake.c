@@ -97,7 +97,7 @@ static Shake_Status probe(Shake_Device *dev)
 
 /* API implementation. */
 
-Shake_Status Shake_Init()
+Shake_Status Shake_Init(void)
 {
 	struct dirent **nameList;
 	int numOfEntries;
@@ -150,7 +150,7 @@ Shake_Status Shake_Init()
 	return SHAKE_OK;
 }
 
-void Shake_Quit()
+void Shake_Quit(void)
 {
 	if (listHead != NULL)
 	{
@@ -158,7 +158,7 @@ void Shake_Quit()
 	}
 }
 
-int Shake_NumOfDevices()
+int Shake_NumOfDevices(void)
 {
 	return numOfDevices;
 }
