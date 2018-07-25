@@ -45,7 +45,7 @@ else
   CFLAGS += -O2
 endif
 
-.PHONY: all clean
+.PHONY: all install-headers install-lib install clean
 
 all:	$(TARGET)
 
