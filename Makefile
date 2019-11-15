@@ -1,6 +1,6 @@
 ifeq ($(PLATFORM), gcw0)
-  CC         := /opt/gcw0-toolchain/usr/bin/mipsel-linux-gcc
-  STRIP      := /opt/gcw0-toolchain/usr/bin/mipsel-linux-strip
+  CC         ?= /opt/gcw0-toolchain/usr/bin/mipsel-linux-gcc
+  STRIP      ?= /opt/gcw0-toolchain/usr/bin/mipsel-linux-strip
   BACKEND    := LINUX
 endif
 
