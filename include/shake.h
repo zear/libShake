@@ -300,19 +300,19 @@ typedef struct Shake_Effect
 	} u;				/**< Effect type data container. */
 } Shake_Effect;
 
-/** \fn Shake_Status Shake_Init()
+/** \fn Shake_Status Shake_Init(void)
     \brief Initializes libShake.
     \return On success, SHAKE_OK is returned.
     \return On error, SHAKE_ERROR is returned.
 */
 Shake_Status Shake_Init(void);
 
-/** \fn void Shake_Quit()
+/** \fn void Shake_Quit(void)
     \brief Uninitializes libShake.
 */
 void Shake_Quit(void);
 
-/** \fn int Shake_NumOfDevices()
+/** \fn int Shake_NumOfDevices(void)
     \brief Lists the number of haptic devices.
     \return On success, number of devices is returned.
     \return On error, SHAKE_ERROR is returned.
@@ -509,7 +509,7 @@ void Shake_SimpleConstant(Shake_Effect *effect, float forcePercent, float attack
 */
 void Shake_SimpleRamp(Shake_Effect *effect, float startForcePercent, float endForcePercent, float attackSecs, float sustainSecs, float fadeSecs);
 
-/** \fn Shake_ErrorCode Shake_GetErrorCode()
+/** \fn Shake_ErrorCode Shake_GetErrorCode(void)
     \brief Informs about the error type.
     \return Error code reflecting the last error type.
 */
