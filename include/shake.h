@@ -24,7 +24,7 @@ extern "C" {
 /** \def SHAKE_PATCH_VERSION
     \brief Version of the program (patch).
 */
-#define SHAKE_PATCH_VERSION 0
+#define SHAKE_PATCH_VERSION 1
 
 /** \def SHAKE_ENVELOPE_ATTACK_LENGTH_MAX
     \brief Maximum allowed value of Shake_Envelope attackLength

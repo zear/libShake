@@ -9,7 +9,7 @@ $(error Please specify BACKEND. Possible values: LINUX, OSX")
 endif
 
 LIBNAME      := libshake
-SOVERSION    := 1
+SOVERSION    := 2
 
 SRCDIRS      := common
 
