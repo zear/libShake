@@ -64,7 +64,7 @@ install-headers:
 
 install-lib:
 	cp $(TARGET) $(DESTDIR)$(PREFIX)/lib/
-	ln -sf $(DESTDIR)$(PREFIX)/lib/$(TARGET) $(DESTDIR)$(PREFIX)/lib/$(LIBNAME)$(LIBEXT)
+	ln -sf $(TARGET) $(DESTDIR)$(PREFIX)/lib/$(LIBNAME)$(LIBEXT)
 
 install: $(TARGET) install-headers install-lib
 
