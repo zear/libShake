@@ -8,7 +8,7 @@ Shake_Status Shake_EmitErrorCode(Shake_ErrorCode ec)
 	return SHAKE_ERROR;
 }
 
-Shake_ErrorCode Shake_GetErrorCod(void)
+Shake_ErrorCode Shake_GetErrorCode(void)
 {
 	return errorCode;
 }
