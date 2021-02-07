@@ -60,9 +60,11 @@ $(OBJ): $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	$(CC) -c $(CFLAGS) $< -o $@ -I include
 
 install-headers:
+	mkdir -p $(DESTDIR)$(PREFIX)/include/
 	cp include/*.h $(DESTDIR)$(PREFIX)/include/
 
 install-lib:
+	mkdir -p $(DESTDIR)$(PREFIX)/lib/
 	cp $(TARGET) $(DESTDIR)$(PREFIX)/lib/
 	ln -sf $(TARGET) $(DESTDIR)$(PREFIX)/lib/$(LIBNAME)$(LIBEXT)
 
